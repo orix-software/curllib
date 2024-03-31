@@ -1,0 +1,12 @@
+mkdir libs
+curl --insecure -o libs/socketlib.tgz http://repo.orix.oric.org/dists/2024.2/tgz/6502/socketlib.tgz
+cd libs/ && tar xvfz socketlib.tgz && cd ..
+rm libs/socketlib.tgz
+
+curl --insecure -o libs/ch395lib.tgz http://repo.orix.oric.org/dists/2024.2/tgz/6502/ch395lib.tgz
+cd libs/ && tar xvfz ch395lib.tgz && cd ..
+rm libs/ch395lib.tgz
+
+curl --insecure -o libs/inetlib.tgz http://repo.orix.oric.org/dists/2024.2/tgz/6502/inetlib.tgz
+cd libs/ && tar xvfz inetlib.tgz && cd ..
+rm libs/inetlib.tgz
