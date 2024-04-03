@@ -8,7 +8,7 @@
 
 typedef enum {
   CURLE_OK = 0,
-//   CURLE_UNSUPPORTED_PROTOCOL,    /* 1 */
+  CURLE_UNSUPPORTED_PROTOCOL,      /* 1 */
 //   CURLE_FAILED_INIT,             /* 2 */
 //   CURLE_URL_MALFORMAT,           /* 3 */
 //   CURLE_NOT_BUILT_IN,            /* 4 - [was obsoleted in August 2007 for
@@ -52,7 +52,7 @@ typedef enum {
 //   CURLE_FTP_PORT_FAILED,         /* 30 - FTP PORT operation failed */
 //   CURLE_FTP_COULDNT_USE_REST,    /* 31 - the REST command failed */
 //   CURLE_OBSOLETE32,              /* 32 - NOT USED */
-//   CURLE_RANGE_ERROR,             /* 33 - RANGE "command" didn't work */
+     CURLE_RANGE_ERROR,             /* 33 - RANGE "command" didn't work */
 //   CURLE_HTTP_POST_ERROR,         /* 34 */
 //   CURLE_SSL_CONNECT_ERROR,       /* 35 - wrong when connecting with SSL */
 //   CURLE_BAD_DOWNLOAD_RESUME,     /* 36 - couldn't resume download */
@@ -142,10 +142,9 @@ typedef enum {
 //   CURLE_QUIC_CONNECT_ERROR,      /* 96 - QUIC connection error */
 //   CURLE_PROXY,                   /* 97 - proxy handshake error */
 //   CURLE_SSL_CLIENTCERT,          /* 98 - client-side certificate required */
+  CURLE_TOO_LARGE,               /* 100 - a value/data met its maximum */
 //   CURL_LAST /* never use! */
 } CURLcode;
-
-
 
 struct Curl_easy {
     char hostname[CURL_MAX_LENGTH_HOSTNAME];
@@ -153,9 +152,10 @@ struct Curl_easy {
     unsigned int dest_port;
     unsigned long ip_dest;
     char uri[CURL_MAX_LENGTH_URI];
+    unsigned char url[CURL_MAX_LENGTH_URL];
     unsigned int curl_opt_ptr; // For instance only fp
     unsigned char curl_opt;
-    unsigned char url[CURL_MAX_LENGTH_URL];
+    unsigned char protocol; // Protocol
 };
 
 typedef enum {

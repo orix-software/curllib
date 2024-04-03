@@ -12,6 +12,9 @@ curl_easy_perform_debug = 1
 
 .export curl_easy_perform
 
+.import curl_parse_url
+.import curl_print_object
+
 .import socket_close
 .import recv
 .import send
@@ -23,11 +26,27 @@ curl_easy_perform_debug = 1
 .import ch395_set_ip_addr_sn
 
 .proc curl_easy_perform
-    sta     curl_lib_ptr1
-    sty     curl_lib_ptr1+1
-    sty     curl_src_port+1
-    sty     curl_dest_port+1
-    sty     curl_ip_dest+1
+    ;;@brief Performs request
+    ;;@inputA Low ptr curl struct
+    ;;@inputX High ptr curl struct
+    sta     RES
+    stx     RES+1
+
+    jsr     curl_parse_url
+    cmp     #CURLE_OK ; Curl code error if different to 0, we return error
+    beq     @parse_url_ok
+    rts
+
+@parse_url_ok:
+    lda         RES
+    ldy         RES+1
+    jsr     curl_print_object
+    rts
+    ; sta     curl_lib_ptr1
+    ; sty     curl_lib_ptr1+1
+    ; sty     curl_src_port+1
+    ; sty     curl_dest_port+1
+    ; sty     curl_ip_dest+1
 
     lda     #$00
     ldx     #AF_INET

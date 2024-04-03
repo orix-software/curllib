@@ -8,9 +8,14 @@
 
 .define CURL_MAX_LENGTH_URL CURL_MAX_LENGTH_HOSTNAME + CURL_MAX_LENGTH_URI + CURL_MAX_LENGTH_PORT + CURL_MAX_LENGTH_PROTOCOL + CURL_MAX_LENGTH_SEPARATOR_URL
 
+.define CURL_PROTOCOL_HTTP 1
+
 .enum
     CURLE_OK ; No error
+    CURLE_UNSUPPORTED_PROTOCOL
+    CURLE_RANGE_ERROR
     CURLE_UNKNOWN_OPTION
+    CURLE_TOO_LARGE ;               /* 100 - a value/data met its maximum */
 .endenum
 ; OPT !!
 
@@ -28,11 +33,9 @@ CURLOPT_DRYRUN    = 16
     ip_dest             .res 4
     uri                 .res CURL_MAX_LENGTH_URI
     url                 .res CURL_MAX_LENGTH_URL
-; Behavior :
-; * CURLOPT_HEADER
-
     curl_opt_ptr        .res 2
     curl_opt            .res 1
+    protocol            .res 1
 .endstruct
 
 .if     .sizeof(curl_struct) > 255

@@ -19,7 +19,9 @@
     ;;@inputY CURLOPT_URL
     ;;@inputMEM_RES  parameter
     ;;@modifyMEM_TR0 Tmp
+    ;;@modifyMEM_TR1 Tmp
     ;;@modifyMEM_RESB Ptr
+    ;;@note send CURLE_TOO_LARGE if the url parameter is bigger than lib curl can
 
     sta     RESB
     stx     RESB+1
@@ -77,8 +79,33 @@
     rts
 
 @url_option:
+    lda     #curl_struct::url
+    sta     TR0
 
-    jsr     curl_parse_url
+    ldy     #$00
+@L1:
+    lda     (RES),y
+    beq     @out_copy_url
+
+    ; FIXME 65C02 TYX instead
+    sty     TR1
+
+    ldy     TR0
+    sta     (RESB),y
+    inc     TR0
+    ; FIXME 65C02 TXY instead
+    ldy     TR1
+    iny
+    cpy     #CURL_MAX_LENGTH_URL
+    bne     @L1
+    ; Error
+    lda     #CURLE_TOO_LARGE
+    rts
+
+@out_copy_url:
+    ; Set eos
+    ldy     TR0
+    sta     (RESB),y
     lda     #CURLE_OK
     rts
 
