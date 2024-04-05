@@ -2,6 +2,14 @@
 
 ## curl_easy_cleanup
 
+***Description***
+
+free ressources
+
+***Input***
+
+* Accumulator : Low ptr
+* X Register : High ptr
 
 
 ## curl_easy_init
@@ -25,6 +33,14 @@ Create curl struct
 
 ## curl_easy_perform
 
+***Description***
+
+Performs request
+
+***Input***
+
+* Accumulator : Low ptr curl struct
+* X Register : High ptr curl struct
 
 
 ## curl_easy_setopt
@@ -43,7 +59,9 @@ Set opt
 ***Modify***
 
 * TR0Tmp
+* TR1Tmp
 * RESBPtr
+!!! note "send CURLE_TOO_LARGE if the url parameter is bigger than lib curl can"
 
 
 ## curl_easy_strerror
@@ -51,6 +69,10 @@ Set opt
 
 
 ## curl_parse_url
+
+
+
+## curl_search_protocol
 
 
 

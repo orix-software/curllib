@@ -1,10 +1,18 @@
 # C
 
+***Description***
+
+void curl_easy_cleanup(CURL *handle);
+
 
 
 ## CURL *curl_easy_init();
 
 
+
+***Description***
+
+CURLcode curl_easy_perform(CURL *easy_handle);
 
 
 
@@ -39,7 +47,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLoption option, void parameter);
    ;;@inputY CURLOPT_URL
    ;;@inputMEM_RES  parameter
    ;;@modifyMEM_TR0 Tmp
+   ;;@modifyMEM_TR1 Tmp
    ;;@modifyMEM_RESB Ptr
+   ;;@note send CURLE_TOO_LARGE if the url parameter is bigger than lib curl can
    sta     RESB
    stx     RESB+1
    sty     TR0
@@ -84,12 +94,35 @@ not_verbose_dryrun:
    lda     #CURLE_OK
    rts
 url_option:
-   jsr     curl_parse_url
+   lda     #curl_struct::url
+   sta     TR0
+   ldy     #$00
+L1:
+   lda     (RES),y
+   beq     @out_copy_url
+   ; FIXME 65C02 TYX instead
+   sty     TR1
+   ldy     TR0
+   sta     (RESB),y
+   inc     TR0
+   ; FIXME 65C02 TXY instead
+   ldy     TR1
+   iny
+   cpy     #CURL_MAX_LENGTH_URL
+   bne     @L1
+   ; Error
+   lda     #CURLE_TOO_LARGE
+   rts
+out_copy_url:
+   ; Set eos
+   ldy     TR0
+   sta     (RESB),y
    lda     #CURLE_OK
    rts
 endproc
 
 
+const char supported_protocol_str[5] = "http";
 const char str_curl_object[15] = "Curl object : ";
 const char str_hostname[13] = " Hostname : ";
 const char str_port[9] = " Port : ";
