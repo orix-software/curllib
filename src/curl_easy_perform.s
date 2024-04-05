@@ -15,6 +15,8 @@ curl_easy_perform_debug = 1
 .import curl_parse_url
 .import curl_print_object
 
+.import inet_aton
+
 .import socket_close
 .import recv
 .import send
@@ -38,8 +40,8 @@ curl_easy_perform_debug = 1
     rts
 
 @parse_url_ok:
-    lda         RES
-    ldy         RES+1
+    lda     RES
+    ldy     RES+1
     jsr     curl_print_object
     rts
     ; sta     curl_lib_ptr1

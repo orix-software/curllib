@@ -1,15 +1,17 @@
 .include "curl.inc"
 .include "telestrat.inc"
 
+.include "../dependencies/orix-sdk/macros/SDK_misc.mac"
+
 .export curl_parse_url
 
-
-.import inet_aton
 
 .proc  curl_parse_url
     ; RES must contains struct
     ; Use TR0
     ; Use TR1
+    ; Use TR2
+    ; Use TR3
 
     ldy     #curl_struct::url
 
@@ -22,7 +24,6 @@
     cpy     #$05+curl_struct::url
     beq     @is_a_not_protocol
     bne     @search_protocol
-
 
 @is_a_not_protocol:
     ; at this step we guess that there is no protocol, and it means that it's http. Cut hostname then
@@ -70,9 +71,16 @@
     beq     @check_uri
 
 @check_port:
-    lda     #curl_struct::dest_port
-    sta     TR0
+    ; Store first position of the port
+    ; ex : http://www.oric.org:443
+    ;                         |
+    sty     TR0
+    ; and inc to set to the first number of the port
+    ; ex : http://www.oric.org:443
+    ;                          |
+    inc     TR0
 
+    ldx     #$00
 @loop_check_port:
     iny
     lda     (RES),y
@@ -83,20 +91,20 @@
     bcc     @error_port
     cmp     #':'
     bcs     @error_port
-    sty     TR1
-    ldy     TR0
-    sta     (RES),y
-    inc     TR0
-    ldy     TR1
+    inx
+    cpx     #$05
+    beq     @error_port
+    ;sty     TR1
+    ;ldy     TR0
+    ;sta     (RES),y
+    ;inc     TR0
+    ;ldy     TR1
+
     jmp     @loop_check_port
 
 @end_port:
-    sty     TR1
-    ldy     TR0
-    lda     #$00
-    sta     (RES),y ; set ascii port ... FIXME
-    ldy     TR1
-    jmp     @finished_parsing_hostname
+    ; XDECAY Modify RES and RESB !
+    jmp     @compute_port
 
 @end_parse_url:
     lda     #CURLE_OK
@@ -127,8 +135,6 @@
     jmp     @loop_check_uri
 
 @end_uri:
-
-
     ldy     TR0
     sta     (RES),y
     jmp     @end_parse_url
@@ -137,6 +143,62 @@
     lda     #CURLE_RANGE_ERROR
     rts
 
+@compute_port:
+    sty     TR1
+    lda     RES+1
+    sta     TR2+1
+    ; Compute the offset of the number
+    lda     TR0
+    clc
+    adc     RES
+    bcc     @S3
+    inc     TR2
+@S3:
+    sta     TR2
+    ; At this step TR2 (and TR3) are set here (ptr):
+    ; ex : http://www.oric.org:443
+    ;                          |
+
+    ldy     TR1
+    lda     (RES),y
+    sta     TR0 ; Save the char under  the char after the port
+    lda     #$00
+    sta     (RES),y ; Store 0
+
+    lda     RES
+    sta     TR4
+    lda     RES+1
+    sta     TR4+1
+
+    lda     TR2
+    ldy     TR3
+    BRK_TELEMON XDECAY  ; Modify RES and RESB
+    ; A and Y contains the 16 bits value
+    ; Save
+    sta     TR2
+    sty     TR3
+    ; Restore RES
+    lda     TR4
+    sta     RES
+    lda     TR4+1
+    sta     RES+1
+
+
+    ; Restore value in url
+    ldy     TR1
+    lda     TR0
+    sta     (RES),y
+
+    ldy     #curl_struct::dest_port
+    lda     TR2
+    sta     (RES),y
+    iny
+    lda     TR3
+    sta     (RES),y
+
+
+    ldy     TR1
+    jmp     @finished_parsing_hostname
 
 .endproc
 

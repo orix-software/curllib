@@ -27,6 +27,7 @@
     sty     RES+1
 
     ldy     #curl_struct::protocol
+    lda     #CURL_PROTOCOL_HTTP
     sta     (RES),y
 
     ldy     #curl_struct::dest_port
@@ -43,8 +44,6 @@
 
     ldy     #curl_struct::uri
     sta     (RES),y
-
-
 
     ; init to ip 0.0.0.0
     ldy     #curl_struct::ip_dest
