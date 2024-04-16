@@ -7,11 +7,13 @@
 
 
 .proc  curl_parse_url
-    ; RES must contains struct
+    ; RES must contains struct,and RES content is not modifyed
     ; Use TR0
     ; Use TR1
     ; Use TR2
     ; Use TR3
+    ; Use TR4
+    ; Use TR5
 
     ldy     #curl_struct::url
 

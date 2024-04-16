@@ -16,6 +16,8 @@ rm 1256
 cp curl $ORICUTRON_PATH/SDCARD/BIN/curl
 cp tests/test.sub $ORICUTRON_PATH/SDCARD//etc/autoboot
 cd $ORICUTRON_PATH
-./oricutron
+./oricutron_ch395 
+#-r 16665
+#./oricutron_ch395 -r 16534
 cd -
 

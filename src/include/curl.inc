@@ -48,9 +48,7 @@ curl_current_socket      := $E2
 curl_src_port            := $E4 ; 2 bytes
 curl_count_0A_header     := $E4 ; 1 byte
 curl_count_0D_header     := $E5 ; 1 byte
-curl_dest_port           := $E6
 curl_pos_length_file_str := $E6 ; 1 byte
-curl_ip_dest             := $E8
 curl_buffer              := $EA ; 2 byte
 ; let curl_tmp1 near curl_tmp1 because it's used for a ptr
 curl_tmp1                := $EC ; 1 byte
@@ -58,7 +56,6 @@ curl_tmp2                := $ED
 curl_fp                  := $EE ; 2 bytes
 curl_savey               := $F0 ; one byte
 curl_lib_ptr2            := $F2 ; 2 bytes
-curl_lib_ptr3            := $F4 ; 2 bytes
 
 
 .data

@@ -6,7 +6,7 @@ int main() {
     CURL *curl;
     CURLcode res;
     FILE *fp;
-    char *url = "192.168.1.77:33/toto.htm";
+    char *url = "192.168.1.77/index.htm";
     char outfilename[FILENAME_MAX] = "toto.htm";
 
     curl = curl_easy_init();
