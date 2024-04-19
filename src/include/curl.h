@@ -15,7 +15,7 @@ typedef enum {
 //                                     7.17.0, reused in April 2011 for 7.21.5] */
 //   CURLE_COULDNT_RESOLVE_PROXY,   /* 5 */
 //   CURLE_COULDNT_RESOLVE_HOST,    /* 6 */
-//   CURLE_COULDNT_CONNECT,         /* 7 */
+     CURLE_COULDNT_CONNECT,         /* 7 */
 //   CURLE_WEIRD_SERVER_REPLY,      /* 8 */
 //   CURLE_REMOTE_ACCESS_DENIED,    /* 9 a service was denied by the server
 //                                     due to lack of access - when login fails*/
@@ -156,6 +156,9 @@ struct Curl_easy {
     unsigned int curl_opt_ptr; // For instance only fp
     unsigned char curl_opt;
     unsigned char protocol; // Protocol
+    unsigned int number_bytes_received;
+    unsigned char content_length_string[8];
+    unsigned char content_length_int[4];
 };
 
 typedef enum {

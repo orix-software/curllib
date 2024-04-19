@@ -116,7 +116,7 @@ curl_easy_perform_debug = 1
     cmp     #INVALID_SOCKET
     bne     @continue
     ; Invalid socket here
-
+    lda     #CURLE_COULDNT_CONNECT
     rts
 
 @continue:
@@ -151,13 +151,10 @@ curl_easy_perform_debug = 1
     jsr     connect
     cmp     #$00
     beq     @opened
-    cmp     #EISCONN
-    bne     @is_busy
 
-    rts
-
-@is_busy:
+    ; Error
     ; manage_error
+    lda     #CURLE_COULDNT_CONNECT
     rts
 
 @opened:
@@ -233,6 +230,7 @@ curl_easy_perform_debug = 1
     beq     @eos_hostname
     ldy     curl_tmp1
     sta     (curl_buffer),y
+
     inc     curl_tmp1
     inc     curl_tmp2
     ldy     curl_tmp2
@@ -291,14 +289,27 @@ curl_easy_perform_debug = 1
     rts
 
 @store:
-    sty     curl_tmp1 ; Store length low
-    stx     curl_tmp2 ; Store length High
+; $55BF
 
+
+    ; sty     curl_tmp1 ; Store length low
+    ; stx     curl_tmp2 ; Store length High
+    sty     curl_number_of_bytes_received
+    stx     curl_number_of_bytes_received+1
+
+    jsr     curl_load_res_from_hrs3
+
+    ldy     #curl_struct::number_bytes_received
+    lda     curl_number_of_bytes_received
+    sta     (RES),y
+    iny
+    lda     curl_number_of_bytes_received+1
+    sta     (RES),y
 
     print   str_number_bytes
     ; Displays length
-    lda     curl_tmp1
-    ldy     curl_tmp2
+    lda     curl_number_of_bytes_received
+    ldy     curl_number_of_bytes_received+1
     ldx     #$03 ;
     stx     DEFAFF
     BRK_TELEMON XDECIM
@@ -320,34 +331,56 @@ curl_easy_perform_debug = 1
 ; Looking for content-length
 ;********************************************************
 
+    ; lda     curl_number_of_bytes_received
+    ; sta     curl_tmp1
+
+    ; lda     curl_number_of_bytes_received+1
+    ; sta     curl_tmp2
+
+    crlf
     ldy     #$00
     ldx     #$00
 
 @loop_content:
+
     lda     (curl_lib_ptr2),y           ; Parse "content-length: string"
+    ; Convert to minus
+    cmp     #'a' ; 'a'
+    bcc     @skip
+    cmp     #$7B ; 'z'
+    bcs     @skip
+    sbc     #$1F
+
+@skip:
     cmp     str_content_length,x
     beq     @found_content_length
+
+    jsr     curl_dec_curl_number_of_bytes_received
+    cmp     #$00
+    beq     @content_length_not_found
+
     ldx     #$00
     iny
-    cpy     curl_tmp1
     bne     @loop_content       ; Overflow, content-length not found in the first 256 bytes
     ; Y=0
     inc     curl_lib_ptr2+1
-    lda     #$00
-    sta     curl_tmp1
-    dec     curl_tmp2           ; Dec size
     bne     @loop_content
     ; at this step Content length not found
+@content_length_not_found:
+
     lda     #CURLE_TOO_LARGE
     rts
 
-
 @found_content_length:
+
+    jsr     curl_dec_curl_number_of_bytes_received
+    cmp     #$00
+    beq     @content_length_not_found
     iny
     inx
     cpx     str_content_length_size
     bne     @loop_content
-
+    ; Content length found
     tya
     pha
     print    str_content_length ; Display "content length" string
@@ -379,114 +412,121 @@ curl_easy_perform_debug = 1
 
     iny     ; $0A
     iny     ; Remove $0D
-    sty     curl_savey
-    lda     curl_tmp1
-    sec
-    sbc     curl_savey
-    bcs     @do_not_remove_to_high
-    dec     curl_tmp2
 
-@do_not_remove_to_high:
-    sta     curl_tmp1
-
+    ; Now compute
     tya
     clc
     adc     curl_lib_ptr2
-    bcc     @do_not_remove_to_high_buffer
+    bcc     @no_add
     inc     curl_lib_ptr2+1
 
-@do_not_remove_to_high_buffer:
+@no_add:
+    sta     curl_lib_ptr2
+    ; At this step we are searching 0D/0A Twice
+
+    lda     #$00
+    jsr     curl_store_content_length_value_string_into_uri
+
+    ; Now convert content length string into int
+
+
+    ; Compute content length string into int
+    lda     curl_lib_ptr1
+    sta     RES
+    lda     curl_lib_ptr1+1
+    sta     RES+1
+
+    lda     #curl_struct::content_length_string
+    clc
+    adc     RES
+    bcc     @add3
+    inc     RES+1
+
+@add3:
+    sta     RES
+
+    ldx     #<test_int32
+    ldy     #>test_int32
+    jsr     atoi32
+
+    ; Now store result
+    ldy     #curl_struct::content_length_int
+    lda     TR0
+    sta     (curl_lib_ptr1),y
+    iny
+    lda     TR1
+    sta     (curl_lib_ptr1),y
+    iny
+    lda     TR2
+    sta     (curl_lib_ptr1),y
+    iny
+    lda     TR3
+    sta     (curl_lib_ptr1),y
+
+    ldy     #$00
+
+@search_double_crlf:
+
+    lda     (curl_lib_ptr2),y
+    cmp     #$0D
+    bne     @add_y
+
+    iny
+    lda     (curl_lib_ptr2),y
+    cmp     #$0A
+    bne     @add_y
+    iny
+    lda     (curl_lib_ptr2),y
+    cmp     #$0D
+    bne     @add_y
+    iny
+    lda     (curl_lib_ptr2),y
+    cmp     #$0A
+    bne     @add_y
+    beq     @end_of_header_found
+
+
+@add_y:
+    iny
+    bne     @search_double_crlf
+
+@end_of_header_found:
+
+    ; Now compute
+    tya
+    clc
+    adc     curl_lib_ptr2
+    bcc     @no_add2
+    inc     curl_lib_ptr2+1
+
+@no_add2:
     sta     curl_lib_ptr2
 
     lda     #$00
     jsr     curl_store_content_length_value_string_into_uri
 
-    ; lda     curl_pos_length_file_str
-    ; clc
-    ; adc     #curl_struct::uri
-    ; tay
-    ; lda     #$00
-    ; sta     (curl_lib_ptr1),y
-
-; At this step  curl_struct::uri in curl struct contains the length of the downloaded file
-
-@out_str:
-    crlf
-
-;********************************************************
-; Looking for the end of the header
-;********************************************************
-    lda     #$00
-    sta     curl_count_0A_header
-    sta     curl_count_0D_header
-
-    ldy     #$00
-
-@displ4:
-    lda     (curl_lib_ptr2),y
-    cmp     #$0D
-    beq     @inc_0D
-    cmp     #$0A
-    beq     @inc_0A
-
-    ; others chars : Reset counter
-    lda     #$00
-    sta     curl_count_0A_header
-    sta     curl_count_0D_header
-    iny
-    bne     @displ4
-    inc     curl_lib_ptr2+1
-    dec     curl_tmp2
-    jmp     @displ4
-
-@inc_0A:
-    inc     curl_count_0A_header
-    iny
-    bne     @no_inc_for_header_0A
-    inc     curl_lib_ptr2+1
-    dec     curl_tmp2
-
-@no_inc_for_header_0A:
-    jmp     @verif
-
-@inc_0D:
-    inc     curl_count_0D_header
-    iny
-    bne     @no_inc_for_header_0D
-    inc     curl_lib_ptr2+1
-    dec     curl_tmp2
-
-@no_inc_for_header_0D:
-
-@verif:
-    lda     curl_count_0A_header
-    cmp     #$02
-    bne     @displ4
-    lda     curl_count_0D_header
-    cmp     #$02
-    bne     @displ4
-
-
-    sty     curl_savey
-    lda     curl_tmp1
-    sec
-    sbc     curl_savey
-    bcs     @do_not_remove_to_high2
-    dec     curl_tmp2
-
-@do_not_remove_to_high2:
-    sta     curl_tmp1
-
-    tya
-    clc
-    adc     curl_lib_ptr2
-    bcc     @do_not_remove_to_high_buffer2
-    inc     curl_lib_ptr2+1
-
-@do_not_remove_to_high_buffer2:
-    sta     curl_lib_ptr2
-
 ; Checking if option is set
+
+    jsr     @curl_manage_option
+
+
+    jsr     curl_load_res_from_hrs3
+
+    ldy     #curl_struct::curl_opt
+    lda     (RES),y
+    and     #CURLOPT_WRITEDATA
+    cmp     #CURLOPT_WRITEDATA
+    beq     @close_file
+    lda     #CURLE_OK
+    rts
+
+@close_file:
+    fclose(curl_fp)
+    lda     #CURLE_OK
+
+    rts
+
+@curl_manage_option:
 
     jsr     curl_load_res_from_hrs3
 
@@ -503,76 +543,27 @@ curl_easy_perform_debug = 1
     lda     (RES),y
     sta     curl_fp+1
 
-    fwrite (curl_lib_ptr2), (curl_tmp1), 1, curl_fp
-    fclose(curl_fp)
-    jmp     @close_socket
+    fwrite (curl_lib_ptr2), (curl_number_of_bytes_received), 1, curl_fp
+
+    rts
 
 ; Output to screen
 
 @output_screen:
-    lda     curl_tmp2
-    beq     @display_end
-
-    lda     curl_buffer
-    sta     RESB
-    lda     curl_buffer+1
-    sta     RESB+1
-
+    crlf
     ldy     #$00
 
 @displ3:
-    lda     (RESB),y
-    BRK_TELEMON XWR0
-    iny
-    bne     @displ3
-    inc     RESB+1
-    dec     curl_tmp2
-    bne     @displ3
-
-    lda     curl_tmp1
-    beq     @skip_end_buffer2
-
-@display_end:
-    ldy     #$00
-
-@displ2:
     lda     (curl_lib_ptr2),y
     BRK_TELEMON XWR0
     iny
-    cpy     curl_tmp1
-    bne     @displ2
-
-@skip_end_buffer2:
+    bne     @displ3
 
 @close_socket:
-
-;     lda TR0
-;     ldx     #<test_int32
-;     ldy     #>test_int32
-;     jsr     atoi32
-; @me2:
-;     jmp     @me2
-
-    lda TR0
-
     ldx     curl_current_socket
     jsr     socket_close
 
     rts
-
-.proc curl_store_content_length_value_string_into_uri
-    pha
-    lda     curl_pos_length_file_str
-    clc
-    adc     #curl_struct::uri   ; Recycling uri to store length of the content (string)
-    tay
-    pla
-    sta     (curl_lib_ptr1),y
-    inc     curl_pos_length_file_str
-    rts
-.endproc
-
-
 
 str_resolver_not_handled_yet:
     .asciiz "hostname detected : Resolver not managed yet"
@@ -599,7 +590,7 @@ str_number_bytes:
     .asciiz "Number bytes received: "
 
 str_content_length:
-    .asciiz "Content-Length: "
+    .asciiz "CONTENT-LENGTH: "
 
 str_content_length_size:
     .byte    16
@@ -607,6 +598,101 @@ str_content_length_size:
 test_int32:
     .asciiz "6000000"
 .endproc
+
+.proc curl_dec_remaining_bytes_content_length
+    ; Decrement content_length
+    ldy     #curl_struct::content_length_int
+    lda     (curl_lib_ptr1),y
+	bne     _DEC0
+
+    ldy     #curl_struct::content_length_int+1
+    lda     (curl_lib_ptr1),y
+	bne     _DEC1
+
+    ldy     #curl_struct::content_length_int+2
+    lda     (curl_lib_ptr1),y
+	bne     _DEC2
+
+    ldy     #curl_struct::content_length_int+3
+    lda     (curl_lib_ptr1),y
+    beq     integer_32_is_equal_to_0
+    sec
+    sbc     #$01
+    sta     (curl_lib_ptr1),y
+
+_DEC2:
+    ldy     #curl_struct::content_length_int+2
+    lda     (curl_lib_ptr1),y
+    sec
+    sbc     #$01
+    sta     (curl_lib_ptr1),y
+
+_DEC1:
+    ldy     #curl_struct::content_length_int+1
+    lda     (curl_lib_ptr1),y
+    sec
+    sbc     #$01
+    sta     (curl_lib_ptr1),y
+
+_DEC0:
+    ldy     #curl_struct::content_length_int
+    lda     (curl_lib_ptr1),y
+    sec
+    sbc     #$01
+    sta     (curl_lib_ptr1),y
+
+    lda     #$01
+    rts
+
+integer_32_is_equal_to_0:
+    lda     #$00
+
+    rts
+.endproc
+
+
+.proc curl_dec_curl_number_of_bytes_received
+
+    lda     curl_number_of_bytes_received
+    bne     @sub
+
+    lda     curl_number_of_bytes_received+1
+    bne     @sub
+
+    lda     #$00
+    rts
+
+@sub:
+    lda     curl_number_of_bytes_received ;
+    bne     @out
+    dec     curl_number_of_bytes_received+1
+
+@out:
+    dec     curl_number_of_bytes_received
+
+
+    lda     #$01 ; NOK
+
+    rts
+
+
+
+.endproc
+
+
+
+.proc curl_store_content_length_value_string_into_uri
+    pha
+    lda     curl_pos_length_file_str
+    clc
+    adc     #curl_struct::content_length_string
+    tay
+    pla
+    sta     (curl_lib_ptr1),y
+    inc     curl_pos_length_file_str
+    rts
+.endproc
+
 
 .proc curl_save_res_into_hrs3
     lda     RES

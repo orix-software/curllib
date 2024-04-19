@@ -51,6 +51,16 @@
 
 @write_data_option:
     ; store fp
+
+    lda     RES
+    beq     @disable_write_data_option
+
+    lda     #curl_struct::curl_opt
+    lda     (RESB),y
+    ora     #CURLOPT_WRITEDATA
+    sta     (RESB),y
+
+@set_fp:
     ldy     #curl_struct::curl_opt_ptr
     lda     RES
     sta     (RESB),y
@@ -60,6 +70,15 @@
 
     lda     #CURLE_OK
     rts
+
+@disable_write_data_option:
+    lda     #curl_struct::curl_opt
+    lda     (RESB),y
+    eor     #CURLOPT_WRITEDATA
+    sta     (RESB),y
+    lda     #CURLE_OK
+    rts
+
 
 @verbose_option:
     print   verbose_option_str

@@ -13,6 +13,7 @@
 .enum
     CURLE_OK ; No error
     CURLE_UNSUPPORTED_PROTOCOL
+    CURLE_COULDNT_CONNECT
     CURLE_RANGE_ERROR
     CURLE_UNKNOWN_OPTION
     CURLE_TOO_LARGE ;               /* 100 - a value/data met its maximum */
@@ -21,7 +22,7 @@
 
 CURLOPT_WRITEDATA = 1
 CURLOPT_URL       = 2
-CURLOPT_PORT      = 3 ;   /* Port number to connect to, if other than default. */
+CURLOPT_PORT      = 32 ;   /* Port number to connect to, if other than default. */
 CURLOPT_HEADER    = 4
 CURLOPT_VERBOSE   = 8
 CURLOPT_DRYRUN    = 16
@@ -29,13 +30,16 @@ CURLOPT_DRYRUN    = 16
 .struct curl_struct
     hostname            .res CURL_MAX_LENGTH_HOSTNAME
     sockfd              .res 1
-    dest_port           .res 2
+    dest_port           .word
     ip_dest             .res 4
     uri                 .res CURL_MAX_LENGTH_URI
     url                 .res CURL_MAX_LENGTH_URL
-    curl_opt_ptr        .res 2
+    curl_opt_ptr        .word
     curl_opt            .res 1
-    protocol            .res 1
+    protocol              .res 1
+    number_bytes_received .word
+    content_length_string .res 8 ; Contains string digit of content length
+    content_length_int    .res 4 ; Contains 32 bits int of content length
 .endstruct
 
 .if     .sizeof(curl_struct) > 255
@@ -45,10 +49,10 @@ CURLOPT_DRYRUN    = 16
 curl_lib_zp_start        := $E0
 curl_lib_ptr1            := curl_lib_zp_start ; 2 bytes
 curl_current_socket      := $E2
-curl_src_port            := $E4 ; 2 bytes
-curl_count_0A_header     := $E4 ; 1 byte
-curl_count_0D_header     := $E5 ; 1 byte
-curl_pos_length_file_str := $E6 ; 1 byte
+curl_count_0A_header     := $E3 ; 1 byte
+curl_count_0D_header     := $E4 ; 1 byte
+curl_pos_length_file_str := $E5 ; 1 byte
+curl_number_of_bytes_received := $E6 ; 2 byte
 curl_buffer              := $EA ; 2 byte
 ; let curl_tmp1 near curl_tmp1 because it's used for a ptr
 curl_tmp1                := $EC ; 1 byte
