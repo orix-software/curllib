@@ -18,6 +18,9 @@
     ;;@inputY CURLOPT_URL
     ;;@inputMEM_RES  parameter
 
+
+    ; Save parameter
+
     sta     RES
     stx     RES+1
 

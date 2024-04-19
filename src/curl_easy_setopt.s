@@ -1,9 +1,6 @@
-; A & Y ptr
-; HRS1 option ID
-; RES ptr last arg
-
 .include "curl.inc"
 .include "telestrat.inc"
+.include "_file.inc"
 
 .include "../dependencies/orix-sdk/macros/SDK_print.mac"
 
@@ -61,11 +58,10 @@
     sta     (RESB),y
 
 @set_fp:
+    ldy     #_FILE::f_fd
+    lda     (RES),y        ; file->f_fd = fd;
+
     ldy     #curl_struct::curl_opt_ptr
-    lda     RES
-    sta     (RESB),y
-    iny
-    lda     RES+1
     sta     (RESB),y
 
     lda     #CURLE_OK
@@ -78,7 +74,6 @@
     sta     (RESB),y
     lda     #CURLE_OK
     rts
-
 
 @verbose_option:
     print   verbose_option_str

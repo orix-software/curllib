@@ -342,6 +342,9 @@ curl_easy_perform_debug = 1
     ldx     #$00
 
 @loop_content:
+    jsr     curl_dec_curl_number_of_bytes_received
+    cmp     #$00
+    beq     @content_length_not_found
 
     lda     (curl_lib_ptr2),y           ; Parse "content-length: string"
     ; Convert to minus
@@ -354,10 +357,6 @@ curl_easy_perform_debug = 1
 @skip:
     cmp     str_content_length,x
     beq     @found_content_length
-
-    jsr     curl_dec_curl_number_of_bytes_received
-    cmp     #$00
-    beq     @content_length_not_found
 
     ldx     #$00
     iny
@@ -373,20 +372,28 @@ curl_easy_perform_debug = 1
 
 @found_content_length:
 
-    jsr     curl_dec_curl_number_of_bytes_received
-    cmp     #$00
-    beq     @content_length_not_found
     iny
     inx
     cpx     str_content_length_size
     bne     @loop_content
     ; Content length found
+
     tya
     pha
     print    str_content_length ; Display "content length" string
     pla
     tay
 
+    tya
+    clc
+    adc     curl_lib_ptr2
+    bcc     @no_add3
+    inc     curl_lib_ptr2+1
+
+@no_add3:
+    sta     curl_lib_ptr2
+
+    ldy     #$00
 ;********************************************************
 ; Display content-length
 ;********************************************************
@@ -395,13 +402,16 @@ curl_easy_perform_debug = 1
 
     ;ldy     #$00
 @display_size_content_length:
+
     lda     (curl_lib_ptr2),y
+
     cmp     #$0D
     beq     @exit_content_length
     sty     curl_savey
     ; Store the number (string) into uri ptr
     jsr     curl_store_content_length_value_string_into_uri
     BRK_TELEMON XWR0         ; Display the char
+    jsr     curl_dec_curl_number_of_bytes_received
     ldy     curl_savey
     iny
     bne     @display_size_content_length
@@ -423,7 +433,7 @@ curl_easy_perform_debug = 1
 @no_add:
     sta     curl_lib_ptr2
     ; At this step we are searching 0D/0A Twice
-
+    jsr     curl_dec_curl_number_of_bytes_received
     lda     #$00
     jsr     curl_store_content_length_value_string_into_uri
 
@@ -449,6 +459,7 @@ curl_easy_perform_debug = 1
     ldy     #>test_int32
     jsr     atoi32
 
+
     ; Now store result
     ldy     #curl_struct::content_length_int
     lda     TR0
@@ -466,31 +477,35 @@ curl_easy_perform_debug = 1
     ldy     #$00
 
 @search_double_crlf:
-
     lda     (curl_lib_ptr2),y
     cmp     #$0D
     bne     @add_y
-
+    jsr     curl_dec_curl_number_of_bytes_received
     iny
     lda     (curl_lib_ptr2),y
     cmp     #$0A
     bne     @add_y
+    jsr     curl_dec_curl_number_of_bytes_received
     iny
     lda     (curl_lib_ptr2),y
     cmp     #$0D
     bne     @add_y
+    jsr     curl_dec_curl_number_of_bytes_received
     iny
     lda     (curl_lib_ptr2),y
     cmp     #$0A
     bne     @add_y
     beq     @end_of_header_found
 
-
 @add_y:
+    sty     curl_savey
+    jsr     curl_dec_curl_number_of_bytes_received
+    ldy     curl_savey
     iny
     bne     @search_double_crlf
 
 @end_of_header_found:
+
 
     ; Now compute
     tya
@@ -502,14 +517,16 @@ curl_easy_perform_debug = 1
 @no_add2:
     sta     curl_lib_ptr2
 
+
     lda     #$00
     jsr     curl_store_content_length_value_string_into_uri
+
+    jsr     curl_dec_curl_number_of_bytes_received
+    jsr     curl_dec_curl_number_of_bytes_received
 
 ; Checking if option is set
 
     jsr     @curl_manage_option
-
-
     jsr     curl_load_res_from_hrs3
 
     ldy     #curl_struct::curl_opt
@@ -542,6 +559,8 @@ curl_easy_perform_debug = 1
     iny
     lda     (RES),y
     sta     curl_fp+1
+
+
 
     fwrite (curl_lib_ptr2), (curl_number_of_bytes_received), 1, curl_fp
 
@@ -674,12 +693,7 @@ integer_32_is_equal_to_0:
     lda     #$01 ; NOK
 
     rts
-
-
-
 .endproc
-
-
 
 .proc curl_store_content_length_value_string_into_uri
     pha
