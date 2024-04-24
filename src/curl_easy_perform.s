@@ -29,7 +29,7 @@ curl_easy_perform_debug = 1
 .import ch395_set_sour_port_sn
 .import ch395_set_des_port_sn
 .import ch395_set_ip_addr_sn
-
+.import ch395_clear_recv_buf_sn
 
 .proc curl_easy_perform
 
@@ -453,12 +453,11 @@ curl_easy_perform_debug = 1
     inc     RES+1
 
 @add3:
-    sta     RES
+    tax
 
-    ldx     #<test_int32
-    ldy     #>test_int32
+    ldx     RES
+    ldy     RES+1
     jsr     atoi32
-
 
     ; Now store result
     ldy     #curl_struct::content_length_int
@@ -505,8 +504,6 @@ curl_easy_perform_debug = 1
     bne     @search_double_crlf
 
 @end_of_header_found:
-
-
     ; Now compute
     tya
     clc
@@ -527,6 +524,43 @@ curl_easy_perform_debug = 1
 ; Checking if option is set
 
     jsr     @curl_manage_option
+
+    crlf
+    lda     curl_number_of_bytes_received
+    ldy     curl_number_of_bytes_received+1
+    print_int  ,2, 2 ; an arg is skipped because the number is from register
+    crlf
+    ldy     #curl_struct::content_length_int+1 ; 10701
+    lda     (curl_lib_ptr1),y
+    sta     RES
+
+    dey
+    lda     (curl_lib_ptr1),y
+
+    ldy     RES
+    ;ldy     curl_number_of_bytes_received+1
+    print_int  ,2, 2 ; an arg is skipped because the number is from register
+
+    crlf
+    ; Remove number_of_byte_received with content length
+    ldy     #curl_struct::content_length_int ; 10701
+    lda     (curl_lib_ptr1),y
+    sec
+    sbc     curl_number_of_bytes_received
+    sta     (curl_lib_ptr1),y
+    sta     RES
+
+    ldy     #curl_struct::content_length_int+1 ; 10701
+    lda     (curl_lib_ptr1),y
+    sbc     curl_number_of_bytes_received+1
+    sta     (curl_lib_ptr1),y
+
+    tay
+    lda     RES ; 12
+
+    print_int  ,2, 2 ; an arg is skipped because the number is from register
+
+
     jsr     curl_load_res_from_hrs3
 
     ldy     #curl_struct::curl_opt
@@ -560,8 +594,6 @@ curl_easy_perform_debug = 1
     lda     (RES),y
     sta     curl_fp+1
 
-
-
     fwrite (curl_lib_ptr2), (curl_number_of_bytes_received), 1, curl_fp
 
     rts
@@ -573,10 +605,16 @@ curl_easy_perform_debug = 1
     ldy     #$00
 
 @displ3:
+    jsr     curl_dec_curl_number_of_bytes_received
+    cmp     #$00
+    beq     @finished_display
     lda     (curl_lib_ptr2),y
     BRK_TELEMON XWR0
     iny
     bne     @displ3
+
+@finished_display:
+    rts
 
 @close_socket:
     ldx     curl_current_socket

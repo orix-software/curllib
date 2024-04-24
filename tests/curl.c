@@ -7,7 +7,7 @@ int main() {
     CURLcode res;
     FILE *fp;
     char *url = "192.168.1.77/index.htm";
-    char outfilename[FILENAME_MAX] = "toto.htm";
+    char outfilename[FILENAME_MAX] = "10K.htm";
 
     curl = curl_easy_init();
     if (curl) {
@@ -19,7 +19,7 @@ int main() {
         }
 
         // Configuration de la fonction de rappel pour écrire les données dans le fichier
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+       // curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
 
         curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
 
