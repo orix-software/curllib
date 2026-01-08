@@ -14,21 +14,36 @@
     ; Use TR3
     ; Use TR4
     ; Use TR5
+    ; Use TR6
+    ; Use TR7
+
+    is_an_ip := TR6
+    digit_ip := TR7 ; used to count digit in ip
+    rts
+
+    lda     #$00
+    sta     is_an_ip
+    sta     digit_ip
+
+    ; check if url is an ip address
 
     ldy     #curl_struct::url
 
+; Looking for http, https, ftp, ftps, sftp but only http works
+
 @search_protocol:
+
     lda     (RES),y
     beq     @end_parse_url
     cmp     #':'
     beq     @looking_for_protocol
     iny
-    cpy     #$05+curl_struct::url
-    beq     @is_a_not_protocol
+    cpy     #$06 + curl_struct::url ; 6 because we can not have a protocol longer than 6 letters (telnet for example)
     bne     @search_protocol
 
+
 @is_a_not_protocol:
-    ; at this step we guess that there is no protocol, and it means that it's http. Cut hostname then
+    ; at this step we know that there is no protocol, and it means that it's http. Cut hostname then
 
     lda     #curl_struct::hostname
     sta     TR0
@@ -43,6 +58,22 @@
     cmp     #'/'
     beq     @finished_parsing_hostname
 
+; @isdigit:
+;     cmp     #'0'         ; Comparer avec '0'
+;     bcc     @not_digit    ; Si A < '0', ce n'est pas un chiffre
+;     cmp     #'9' + 1       ; Comparer avec '9' + 1
+;     bcs     @not_digit    ; Si A >= '9' + 1, ce n'est pas un chiffre
+;     ; Si nous arrivons ici, c'est un chiffre
+;     rts              ; Retourner avec Z défini
+
+; @not_digit:
+;     ; Defines if it's not ip address
+;     ldx     #$01
+;     stx     is_an_ip
+
+
+@continue:
+
     sty     TR1
 
     ldy     TR0
@@ -51,7 +82,7 @@
 
     ldy     TR1
     iny
-    cpy     #curl_struct::url+CURL_MAX_LENGTH_URL
+    cpy     #curl_struct::url + CURL_MAX_LENGTH_URL
     bne     @L13
 
     ; url is checked in setopt already
@@ -113,6 +144,7 @@
     rts
 
 @looking_for_protocol:
+
     jsr     curl_search_protocol
     cmp     #$00 ; OK
     beq     @is_a_not_protocol
@@ -208,42 +240,8 @@
     ; Returns 0 if protocol found
     ; returns 1 if protocol is not found
     ; Y contains the first char after :// if protocol is found
-    ldy     #curl_struct::url
-    ldx     #$00
+    ;jmp     curl_search_protocol
 
-@L1_search_protocol:
-    lda     (RES),y
-    cmp     #':'
-    beq     @validate
-    cmp     supported_protocol_str,x
-    bne     @protocol_not_supported
-    iny
-    inx
-    bne     @L1_search_protocol
 
-@validate:
-    iny
-    lda     (RES),y
-    cmp     #'/'
-    bne     @protocol_not_supported
-    iny
-    lda     (RES),y
-    cmp     #'/'
-    bne     @protocol_not_supported
-    iny
-    lda     #CURLE_OK
 
-    rts
-
-@protocol_not_supported:
-    ldy     #curl_struct::protocol
-    sta     (RES),y
-    lda     #$01
-    rts
-
-supported_protocol_str:
-    .asciiz "http"
-
-supported_protocol_mapping:
-    .byt    <CURL_PROTOCOL_HTTP
 .endproc

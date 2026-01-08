@@ -6,7 +6,7 @@
 .export curl_easy_init
 
 .proc curl_easy_init
-    ;;@brief Create curl struct
+    ;;@brief Create curl struct (calls XMALLOC from kernel)
     ;;@modifyMEM_RES ptr
     ;;@returnsA Low ptr curl struct
     ;;@returnsY High ptr curl struct
@@ -24,10 +24,10 @@
 
 @continue:
     sta     RES
-    sty     RES+1
+    sty     RES + 1
 
     ldy     #curl_struct::protocol
-    lda     #CURL_PROTOCOL_HTTP
+    lda     #CURLPROTO_HTTP
     sta     (RES),y
 
     ldy     #curl_struct::dest_port
@@ -59,7 +59,7 @@
     sta     (RES),y
 
     lda     RES
-    ldy     RES+1
+    ldy     RES + 1
 
     rts
 .endproc

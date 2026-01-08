@@ -11,17 +11,13 @@
 .import popa
 
 .proc _curl_easy_setopt
-    ;;@brief CURLcode curl_easy_setopt(CURL *handle, CURLoption option, void parameter);
-    ;;@inputA Low struct curl ptr
-    ;;@inputX High struct curl ptr
-    ;;@inputY CURLOPT_URL
-    ;;@inputMEM_RES  parameter
-    ; Save parameter
+    ;;@proto CURLcode curl_easy_setopt(CURL *handle, CURLoption option, void parameter);
+    ;;@brief set opt for curl object
 
-    sta     RES
-    stx     RES+1
+    sta     RES ; store parameter
+    stx     RES + 1
 
-    jsr     popa
+    jsr     popa    ; Get curl option
     sta     TR0
 
     jsr     popax

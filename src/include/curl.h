@@ -7,6 +7,90 @@
 #define CURL_MAX_LENGTH_URL CURL_MAX_LENGTH_HOSTNAME + CURL_MAX_LENGTH_URI + CURL_MAX_LENGTH_PORT + CURL_MAX_LENGTH_PROTOCOL + CURL_MAX_LENGTH_SEPARATOR_URL
 
 typedef enum {
+    CURLPROTO_HTTP, // Move to have quicker search
+    CURLPROTO_DICT,
+    CURLPROTO_FILE,
+    CURLPROTO_FTP,
+    CURLPROTO_FTPS,
+    CURLPROTO_GOPHER,
+    CURLPROTO_HTTPS,
+    CURLPROTO_IMAP,
+    CURLPROTO_IMAPS,
+    CURLPROTO_LDAP,
+    CURLPROTO_LDAPS,
+    CURLPROTO_POP3,
+    CURLPROTO_POP3S,
+    CURLPROTO_RTMP,
+    CURLPROTO_RTMPE,
+    CURLPROTO_RTMPS,
+    CURLPROTO_RTMPT,
+    CURLPROTO_RTMPTE,
+    CURLPROTO_RTMPTS,
+    CURLPROTO_RTSP,
+    CURLPROTO_SCP,
+    CURLPROTO_SFTP,
+    CURLPROTO_SMB,
+    CURLPROTO_SMBS,
+    CURLPROTO_SMTP,
+    CURLPROTO_SMTPS,
+    CURLPROTO_TELNET,
+    CURLPROTO_TFTP
+} CURLprotocol;
+
+typedef enum {
+  CURLINFO_PROTOCOL, //  WARN ! will be deprecated !  Protocole utilisé pour la dernière transaction.
+  CURLINFO_SCHEME,
+  CURLINFO_EFFECTIVE_URL, // URL effective utilisée dans la dernière transaction.
+  CURLINFO_RESPONSE_CODE, // Code de réponse HTTP de la dernière transaction.
+  CURLINFO_TOTAL_TIME, // Temps total de la dernière transaction, en secondes.
+  CURLINFO_NAMELOOKUP_TIME, // Temps passé à résoudre le nom de domaine, en secondes.
+  CURLINFO_CONNECT_TIME, // Temps passé à établir la connexion, en secondes.
+  CURLINFO_PRETRANSFER_TIME, // Temps passé avant le début du transfert de données, en secondes.
+  CURLINFO_STARTTRANSFER_TIME, // Temps passé avant le début du transfert de données, en secondes.
+  CURLINFO_SIZE_UPLOAD, // Taille totale des données téléchargées.
+  CURLINFO_SIZE_DOWNLOAD, // Taille totale des données téléchargées.
+  CURLINFO_SPEED_DOWNLOAD, // Vitesse moyenne de téléchargement, en octets par seconde.
+  CURLINFO_SPEED_UPLOAD, // Vitesse moyenne de téléchargement, en octets par seconde.
+  CURLINFO_HEADER_SIZE, // Taille de l'en-tête de réponse HTTP.
+  CURLINFO_REQUEST_SIZE, // Taille de la requête HTTP envoyée.
+  CURLINFO_SSL_VERIFYRESULT, // Résultat de la vérification SSL.
+  CURLINFO_FILETIME, // Temps de modification du fichier distant, si disponible.
+  CURLINFO_CONTENT_LENGTH_DOWNLOAD, // Taille du contenu téléchargé, si connue.
+  CURLINFO_CONTENT_LENGTH_UPLOAD, // Taille du contenu téléchargé, si connue.
+  CURLINFO_CONTENT_TYPE, // Type de contenu de la réponse HTTP.
+  CURLINFO_REDIRECT_COUNT, // Nombre de redirections suivies.
+  CURLINFO_REDIRECT_URL, // URL vers laquelle la dernière redirection a été faite.
+  CURLINFO_PRIMARY_IP, // Adresse IP du serveur principal.
+  CURLINFO_PRIMARY_PORT, // Port du serveur principal.
+  CURLINFO_LOCAL_IP, // Adresse IP locale utilisée pour la connexion.
+  CURLINFO_LOCAL_PORT, // Port local utilisé pour la connexion.
+  CURLINFO_HTTP_CONNECTCODE, // Code de réponse HTTP de la requête CONNECT utilisée pour les tunnels proxy.
+  CURLINFO_HTTPAUTH_AVAIL, // Méthodes d'authentification HTTP disponibles.
+  CURLINFO_PROXYAUTH_AVAIL, // Méthodes d'authentification proxy disponibles.
+  CURLINFO_OS_ERRNO, // Numéro d'erreur du système d'exploitation.
+  CURLINFO_NUM_CONNECTS, // Nombre de connexions établies.
+  CURLINFO_SSL_ENGINES, // Moteurs SSL disponibles.
+  CURLINFO_COOKIELIST, // Liste des cookies.
+  CURLINFO_LASTSOCKET, // Dernier socket utilisé.
+  CURLINFO_FTP_ENTRY_PATH, // Chemin d'accès au répertoire FTP.
+  CURLINFO_REDIRECT_TIME, // Temps total passé en redirections, en secondes.
+  CURLINFO_APPCONNECT_TIME, // Temps passé à établir la connexion SSL/SSH, en secondes.
+  CURLINFO_CERTINFO, // Informations sur le certificat SSL.
+  CURLINFO_CONDITION_UNMET, // Indique si une condition n'a pas été remplie.
+  CURLINFO_RTSP_SESSION_ID, // ID de session RTSP.
+  CURLINFO_RTSP_CLIENT_CSEQ, // Numéro de séquence client RTSP.
+  CURLINFO_RTSP_SERVER_CSEQ, // Numéro de séquence serveur RTSP.
+  CURLINFO_RTSP_CSEQ_RECV, // Numéro de séquence reçu RTSP.
+  CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, // Taille du contenu téléchargé, en type curl_off_t.
+  CURLINFO_CONTENT_LENGTH_UPLOAD_T, // Taille du contenu téléchargé, en type curl_off_t.
+  CURLINFO_SIZE_UPLOAD_T, // Taille totale des données téléchargées, en type curl_off_t.
+  CURLINFO_SIZE_DOWNLOAD_T, // Taille totale des données téléchargées, en type curl_off_t.
+  CURLINFO_SPEED_DOWNLOAD_T, // Vitesse moyenne de téléchargement, en type curl_off_t.
+  CURLINFO_SPEED_UPLOAD_T, // Vitesse moyenne de téléchargement, en type curl_off_t.
+} CURLINFO;
+
+
+typedef enum {
   CURLE_OK = 0,
   CURLE_UNSUPPORTED_PROTOCOL,      /* 1 */
 //   CURLE_FAILED_INIT,             /* 2 */
@@ -159,6 +243,7 @@ struct Curl_easy {
     unsigned int number_bytes_received;
     unsigned char content_length_string[8];
     unsigned char content_length_int[4];
+    unsigned char __internal[4]; // For internal curllib purposes
 };
 
 typedef enum {
@@ -179,3 +264,5 @@ CURLcode curl_easy_perform(CURL *easy_handle);
 const char *curl_easy_strerror(CURLcode errornum);
 void curl_easy_cleanup(CURL *handle);
 char *curl_version();
+
+CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, void *parameter);

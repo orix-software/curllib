@@ -3,7 +3,8 @@
 .import curl_easy_strerror
 
 .proc _curl_easy_strerror
-    ;;@brief const char *curl_easy_strerror(CURLcode errornum);
+    ;;@proto const char *curl_easy_strerror(CURLcode errornum);
+    ;;@brief convert errornum into str
     jmp     curl_easy_strerror
 
 .endproc

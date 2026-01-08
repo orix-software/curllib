@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../../src/include/curl.h"
+#include "curl.h"
 
 int main() {
     CURL *curl;
@@ -8,24 +8,23 @@ int main() {
     FILE *fp;
     char *url = "192.168.1.77/10K.htm";
     char outfilename[FILENAME_MAX] = "10K.htm";
-    return 0;
+
+    //printf("Curl version : %s\n", curl_version());
     curl = curl_easy_init();
-    if (curl)
-    {
+
+    if (curl) {
         // Ouverture du fichier en mode écriture binaire
         fp = fopen(outfilename, "wb");
-        if (fp == NULL)
-        {
+        if (fp == NULL) {
             fprintf(stderr, "Impossible d'ouvrir le fichier %s\n", outfilename);
             return 1;
         }
+        printf("Ouverture du fichier %s\n", outfilename);
 
-        return 1;
         // Configuration de la fonction de rappel pour écrire les données dans le fichier
        // curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
 
         curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
-
         curl_easy_setopt(curl, CURLOPT_DRYRUN, 1);
 
         // Configuration de l'URL à récupérer
@@ -37,8 +36,8 @@ int main() {
         }
 
         // Exécution de la requête
-//        res = curl_easy_perform(curl);
-
+        res = curl_easy_perform(curl);
+        return 1;
         // Vérification des erreurs
         if (res != CURLE_OK)
             printf("Echec de la requete : %s\n", curl_easy_strerror(res));

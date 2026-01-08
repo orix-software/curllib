@@ -1,7 +1,13 @@
 .export curl_easy_strerror
+
 .include "telestrat.inc"
 
+
 .proc curl_easy_strerror
+    ;;@brief Set opt
+    ;;@inputA id of the error
+    ;;@returnsa Low struct curl ptr of the string error
+    ;;@returnsX High struct curl ptr of the string error
 
     tay
     lda     error_tab_high,y
@@ -27,14 +33,19 @@ error_tab_high:
 
 str_CURLE_OK:
     .asciiz "OK" ; No error
+
 str_CURLE_UNSUPPORTED_PROTOCOL:
     .asciiz "Unsupported protocol"
+
 str_CURLE_COULDNT_CONNECT:
     .asciiz "Could not connect"
+
 str_CURLE_RANGE_ERROR:
     .asciiz "Range Error"
+
 str_CURLE_UNKNOWN_OPTION:
     .asciiz "Unknown option"
+
 str_CURLE_TOO_LARGE:
     .asciiz "Too large"
 
