@@ -1,6 +1,11 @@
+[[bin]]
+name = "curlpar"
+path_curlpar = "tests/curlpar/src/curlpar.c"
+extra_args_curlpar = "arg1 arg2"
+
 [package]
-name = "curllib"
-version = "2025.1"
+name = "curl"
+version = "2026.1"
 authors = [ "nobody@nobody.fr",]
 license = "MIT OR Apache-2.0"
 edition = "2018"
@@ -20,10 +25,19 @@ asm_bin_tpl_version = "alpha"
 asm_rom_tpl_version = "alpha"
 orixsdk_version = "2023.3.0"
 orix_minimal_kernel_version = "2025.1"
-orix_run_pre_script = "scripts/network.sub"
+orix_run_pre_script = "tests/curl/scripts/network.sub"
 oricutron_path = "/mnt/c/Users/plifp/OneDrive/oric/projets/jedeoric/oricutron_assinie_plugins/oricutron"
+enable_publish = "True"
+enable_build = "True"
+lib = "True"
+rom_compatible = "False"
+web_doc_command = "mkdocs build"
+docsfolder = "mkdocs/docs/"
 
 [dependencies]
 socket = "2025.2"
 ch395 = "2024.4"
 inet = "2025.1"
+
+[srcfolders]
+"src/plugins" = "src/plugins"

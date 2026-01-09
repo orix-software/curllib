@@ -35,14 +35,14 @@ plugins:
 #         watch:
 #             - src/project
 
-dev_addr: '172.30.72.43:8001'
+dev_addr: '172.30.72.43:8002'
 
-docs_dir: code/
-site_dir: api/
+#docs_dir: code/
+#site_dir: api/
 theme:
     name: material
     #logo: favicon.png
-    custom_dir: overrides
+    #custom_dir: overrides
     highlightjs: true
     palette:
         primary: black
@@ -54,10 +54,13 @@ theme:
 
 nav:
     - Introduction: index.md
-    - Versions:
-        - 2024.1:
-            - Assembly: 2024.1/assembly.md
-            - C: 2024.1/c.md
+    # - Versions:
+    #     - 2026.1:
+    #         - Assembly: 2026.1/assembly.md
+    #         - C: 2026.1/c.md
+    #     - 2024.1:
+    #         - Assembly: 2024.1/assembly.md
+    #         - C: 2024.1/c.md
 
 extra_css:
     - stylesheets/extra.css

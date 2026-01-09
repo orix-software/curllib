@@ -144,8 +144,9 @@ int main() {
 
 
     printf("Curl version : %s\n", curl_version());
-     val = check_parsing("http://192.168.1.77/10K.htm", 80, CURLPROTO_HTTP, "http");
-     val = check_parsing("192.168.1.77/10K.htm", 80, CURLPROTO_HTTP, "http");
+    val = check_parsing("gopherd://192.168.1.77/10K.htm", 80, CURLPROTO_HTTP, "http");
+    val = check_parsing("http://192.168.1.77/10K.htm", 80, CURLPROTO_HTTP, "http");
+    val = check_parsing("192.168.1.77/10K.htm", 80, CURLPROTO_HTTP, "http");
     val = check_parsing("https://192.168.1.77/10K.htm", 443, CURLPROTO_HTTPS, "https");
     //val = check_parsing("gopher://192.168.1.77", 443, CURLPROTO_HTTP, "gopher");
 

@@ -115,7 +115,7 @@
 
 
 @url_option:
-    lda     #curl_struct::url ; 
+    lda     #curl_struct::url ;
     ; Recycle curlopt to save #curl_struct::url in struct
     sta     curlopt
 
@@ -189,16 +189,27 @@
     rts
 
 @port_or_protocol_detected:
-    cpy     #$06
-    bcc     @detect_protocol     ; Y < 6 : detect protocol
-    jmp     @return_parse
-
+   ; cpy     #CURL_MAX_LENGTH_PROTOCOL
+   ; bcc     @detect_protocol     ; Y < 6 : detect protocol
+    iny
+    lda     (ptr_parameter),y
+    cmp     #'/' ; Check for port or protocol
+    beq     @detect_slash_slash
+    bne     @return_parse
+@detect_slash_slash:
+    iny
+    lda     (ptr_parameter),y
+    cmp     #'/' ; Check for port or protocol
+    beq     @detect_protocol
+    bne     @return_parse
 
 ; ##############################################################
 ; #                   url option: detect protocol (http ...)   #
 ; ##############################################################
 
 @detect_protocol:
+    dey
+    dey
     ; Store ':' position
     ldy     curlopt
     sta     (curl_res),y
@@ -222,7 +233,10 @@
     lda     protocol_str,x
     beq     @continue
     inx
-    jmp     @loop_list_protocol
+    bne     @loop_list_protocol
+    ; Protocol not found, set error
+    beq     @protocol_not_supported
+
 
 @continue:
     inc     search_id_protocol
@@ -286,6 +300,9 @@
 
 
 @protocol_not_supported:
+    ldy     #curl_struct::protocol
+    lda     #CURLPROTO_UNKNOWN
+    sta     (curl_res),y
     lda     #CURLE_UNSUPPORTED_PROTOCOL
     rts
 

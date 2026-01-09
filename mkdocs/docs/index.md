@@ -1,3 +1,8 @@
-This lib is used to manage DS1501 chip (RTC) for 6502 cpu
+# curl lib for orix
 
-Datasheet : [DS1501-DS1511.pdf](DS1501-DS1511.pdf)
+It's a cc65 curl library for Orix
+
+## Versions
+
+* [2026.1 documentation](2026.1/index.md)
+
