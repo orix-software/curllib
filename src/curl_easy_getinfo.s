@@ -12,6 +12,8 @@
     ;;@modifyMEM_RESB 2 bytes
     ;;@modifyMEM_TR0
     ;;@modifyMEM_TR2 2 bytes
+    ;;@note for CURLINFO_SCHEME, the parameter must be already allocated with enough space to store the string : 7 bytes
+    ;;@note for CURLINFO_PRIMARY_IP, the parameter must be already allocated with enough space to store the string : eg : 16 bytes (xxx.xxx.xxx.xxx + null terminator)
 
     curl_res        := RES
     curl_info       := TR0
@@ -33,6 +35,8 @@
     cpy     #CURLINFO_SCHEME
     beq     @curlinfo_scheme_extract
 
+    cpy     #CURLINFO_HOST
+    beq     @curlinfo_hostname_extract
     lda     #CURLE_UNKNOWN_OPTION
 
     rts
@@ -91,10 +95,40 @@
     lda     #$00
     sta     (TR0),y
 
-
-    lda     CURLE_OK
+    lda     #CURLE_OK
 
     rts
+
+@curlinfo_hostname_extract:
+
+    ; Compute the ptr for hostname
+    jsr     init_ptr
+
+.IFPC02
+    stz     tmp16 + 1
+.else
+    lda     #$00
+    sta     tmp16 + 1
+.endif
+
+    ldy     #curl_struct::hostname
+
+@L2:
+    lda     (curl_res),y ; 5774
+
+    beq     @end_scheme_copy
+    sty     tmp16
+    ldy     tmp16 + 1
+    sta     (TR0),y
+    inc     tmp16 + 1
+    ldy     tmp16
+    iny
+    bne     @L2
+    lda     #CURLE_OK
+
+
+    rts
+
 
 init_ptr:
     ldy     #$00
@@ -104,6 +138,7 @@ init_ptr:
     lda     (get_info_output),y
     sta     TR0 + 1
     rts
+
 
 .endproc
 

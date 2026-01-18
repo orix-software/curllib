@@ -34,7 +34,8 @@ typedef enum {
     CURLPROTO_SMTP,
     CURLPROTO_SMTPS,
     CURLPROTO_TELNET,
-    CURLPROTO_TFTP
+    CURLPROTO_TFTP,
+    CURLPROTO_UNKNOWN
 } CURLprotocol;
 
 typedef enum {
@@ -87,6 +88,8 @@ typedef enum {
   CURLINFO_SIZE_DOWNLOAD_T, // Taille totale des données téléchargées, en type curl_off_t.
   CURLINFO_SPEED_DOWNLOAD_T, // Vitesse moyenne de téléchargement, en type curl_off_t.
   CURLINFO_SPEED_UPLOAD_T, // Vitesse moyenne de téléchargement, en type curl_off_t.
+  CURLINFO_HOST, // ; Warn is not in original curl.h (linux) but needed for orix lib
+  //CURLINFO_URI, // ; Warn is not in original curl.h (linux) but needed for orix lib
 } CURLINFO;
 
 
@@ -94,7 +97,7 @@ typedef enum {
   CURLE_OK = 0,
   CURLE_UNSUPPORTED_PROTOCOL,      /* 1 */
 //   CURLE_FAILED_INIT,             /* 2 */
-//   CURLE_URL_MALFORMAT,           /* 3 */
+   CURLE_URL_MALFORMAT,           /* 3 */
 //   CURLE_NOT_BUILT_IN,            /* 4 - [was obsoleted in August 2007 for
 //                                     7.17.0, reused in April 2011 for 7.21.5] */
 //   CURLE_COULDNT_RESOLVE_PROXY,   /* 5 */
@@ -227,23 +230,24 @@ typedef enum {
 //   CURLE_PROXY,                   /* 97 - proxy handshake error */
 //   CURLE_SSL_CLIENTCERT,          /* 98 - client-side certificate required */
   CURLE_TOO_LARGE,               /* 100 - a value/data met its maximum */
+
 //   CURL_LAST /* never use! */
 } CURLcode;
 
 struct Curl_easy {
-    char hostname[CURL_MAX_LENGTH_HOSTNAME];
-    unsigned char sockfd;
-    unsigned int dest_port;
-    unsigned long ip_dest;
-    char uri[CURL_MAX_LENGTH_URI];
-    unsigned char url[CURL_MAX_LENGTH_URL];
-    unsigned int curl_opt_ptr; // For instance only fp
-    unsigned char curl_opt;
-    unsigned char protocol; // Protocol
-    unsigned int number_bytes_received;
-    unsigned char content_length_string[8];
-    unsigned char content_length_int[4];
-    unsigned char __internal[4]; // For internal curllib purposes
+    unsigned char stub;
+    // char hostname[CURL_MAX_LENGTH_HOSTNAME];
+    // unsigned char sockfd;
+    // unsigned int dest_port;
+    // unsigned long ip_dest;
+    // char uri[CURL_MAX_LENGTH_URI];
+    // unsigned int curl_opt_ptr; // For instance only fp
+    // unsigned char curl_opt;
+    // unsigned char protocol; // Protocol
+    // unsigned int number_bytes_received;
+    // unsigned char content_length_string[8];
+    // unsigned char content_length_int[4];
+    // unsigned char __internal[4]; // For internal curllib purposes
 };
 
 typedef enum {

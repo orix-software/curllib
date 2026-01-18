@@ -4,15 +4,16 @@
 #include <string.h>
 #include "curl.h"
 
-unsigned char check_parsing(char *url, unsigned int expected_port, unsigned char expected_protocol, char *expecting_scheme) {
+unsigned char check_parsing(char *url, unsigned int expected_port, unsigned char expected_protocol, char *expecting_scheme, char *expected_ip) {
     CURL *curl;
     CURLcode res, getinfo_res;
-    char *scheme = "SCHEMEPROT";
+    char *scheme = "01234567";
+    char *host = "255.255.255.255";
     unsigned char protocol;
     unsigned int dest_port = 0;
 
     // Afficher l'adresse du pointeur
-
+    printf("----------------------\n");
     printf("Parsing and checking : %s\n", url);
 
     curl = curl_easy_init();
@@ -126,13 +127,14 @@ unsigned char check_parsing(char *url, unsigned int expected_port, unsigned char
         }
 
 
-
     if (expected_protocol != protocol)
     {
         printf("[ERROR] Protocol expected : %d received : %d\n", expected_protocol, protocol);
         return 1;
     }
 
+    res = curl_easy_getinfo(curl, CURLINFO_HOST, &host);
+    printf("HOST : %s\n", host);
 
     curl_easy_cleanup(curl);
     return 0;
@@ -144,10 +146,12 @@ int main() {
 
 
     printf("Curl version : %s\n", curl_version());
-    val = check_parsing("gopherd://192.168.1.77/10K.htm", 80, CURLPROTO_HTTP, "http");
-    val = check_parsing("http://192.168.1.77/10K.htm", 80, CURLPROTO_HTTP, "http");
-    val = check_parsing("192.168.1.77/10K.htm", 80, CURLPROTO_HTTP, "http");
-    val = check_parsing("https://192.168.1.77/10K.htm", 443, CURLPROTO_HTTPS, "https");
+    val = check_parsing("http://192.168.1.77:80/10K.htm", 80, CURLPROTO_HTTP, "http", "192.168.1.77");
+    val = check_parsing("192.168.1.77:80/10K.htm", 80, CURLPROTO_HTTP, "http", "192.168.1.77");
+    val = check_parsing("456.789.012.234/10K.htm", 80, CURLPROTO_HTTP, "http", "192.168.1.77");
+    val = check_parsing("http://234.567.890.123/10K.htm", 80, CURLPROTO_HTTP, "http", "192.168.1.77");
+    val = check_parsing("https://192.168.1.77/10K.htm", 443, CURLPROTO_HTTPS, "https", "192.168.1.77");
+    val = check_parsing("gopherd://123.456.789.123/10K.htm", 80, CURLPROTO_UNKNOWN, "unknown", "192.168.1.77");
     //val = check_parsing("gopher://192.168.1.77", 443, CURLPROTO_HTTP, "gopher");
 
     return 0;

@@ -12,6 +12,7 @@
     CURLE_COULDNT_CONNECT
     CURLE_RANGE_ERROR
     CURLE_UNKNOWN_OPTION
+    CURLE_URL_MALFORMAT
     CURLE_TOO_LARGE ;               /* 100 - a value/data met its maximum */
 .endenum
 ; OPT !!
@@ -98,6 +99,7 @@
     CURLINFO_SIZE_DOWNLOAD_T ;Taille totale des données téléchargées, en type curl_off_t.
     CURLINFO_SPEED_DOWNLOAD_T ;Vitesse moyenne de téléchargement, en type curl_off_t.
     CURLINFO_SPEED_UPLOAD_T ;Vitesse moyenne de téléchargement, en type curl_off_t.
+    CURLINFO_HOST ; Warn is not in original curl.h (linux) but needed for oric lib
 .endenum
 
 CURLOPT_WRITEDATA = 1
@@ -108,12 +110,11 @@ CURLOPT_DRYRUN    = 16
 CURLOPT_PORT      = 32 ;   /* Port number to connect to, if other than default. */
 
 .struct curl_struct
-    hostname              .res CURL_MAX_LENGTH_HOSTNAME
+    hostname              .res CURL_MAX_LENGTH_HOSTNAME ; eg www.oric.org
     sockfd                .res 1
-    dest_port             .word
-    ip_dest               .res 4
+    dest_port             .word ; Destination port
+    ip_dest               .res 4 ; Ip destination
     uri                   .res CURL_MAX_LENGTH_URI
-    url                   .res CURL_MAX_LENGTH_URL
     curl_opt_ptr          .word
     curl_opt              .res 1
     protocol              .res 1
@@ -302,6 +303,97 @@ end_protocol_str:
 .if     end_protocol_str - protocol_str > 255
   .error  "Error protocol_str is greater than 255, curl_search_protocol will not work"
 .endif
+
+
+mapping_protocol:
+    .byt CURLPROTO_HTTP
+    .byt CURLPROTO_DICT
+    .byt CURLPROTO_FILE
+    .byt CURLPROTO_FTP
+    .byt CURLPROTO_FTPS
+    .byt CURLPROTO_GOPHER
+    .byt CURLPROTO_HTTPS
+    .byt CURLPROTO_IMAP
+    .byt CURLPROTO_IMAPS
+    .byt CURLPROTO_LDAP
+    .byt CURLPROTO_LDAPS
+    .byt CURLPROTO_POP3
+    .byt CURLPROTO_POP3S
+    .byt CURLPROTO_RTMP
+    .byt CURLPROTO_RTMPE
+    .byt CURLPROTO_RTMPS
+    .byt CURLPROTO_RTMPT
+    .byt CURLPROTO_RTMPTE
+    .byt CURLPROTO_RTMPTS
+    .byt CURLPROTO_RTSP
+    .byt CURLPROTO_SCP
+    .byt CURLPROTO_SFTP
+    .byt CURLPROTO_SMB
+    .byt CURLPROTO_SMBS
+    .byt CURLPROTO_SMTP
+    .byt CURLPROTO_SMTPS
+    .byt CURLPROTO_TELNET
+    .byt CURLPROTO_TFTP
+
+mapping_protocol_port_dest_low:
+    .byt <80
+    .byt CURLPROTO_DICT
+    .byt CURLPROTO_FILE
+    .byt CURLPROTO_FTP
+    .byt CURLPROTO_FTPS
+    .byt CURLPROTO_GOPHER
+    .byt <443
+    .byt CURLPROTO_IMAP
+    .byt CURLPROTO_IMAPS
+    .byt CURLPROTO_LDAP
+    .byt CURLPROTO_LDAPS
+    .byt CURLPROTO_POP3
+    .byt CURLPROTO_POP3S
+    .byt CURLPROTO_RTMP
+    .byt CURLPROTO_RTMPE
+    .byt CURLPROTO_RTMPS
+    .byt CURLPROTO_RTMPT
+    .byt CURLPROTO_RTMPTE
+    .byt CURLPROTO_RTMPTS
+    .byt CURLPROTO_RTSP
+    .byt CURLPROTO_SCP
+    .byt CURLPROTO_SFTP
+    .byt CURLPROTO_SMB
+    .byt CURLPROTO_SMBS
+    .byt CURLPROTO_SMTP
+    .byt CURLPROTO_SMTPS
+    .byt CURLPROTO_TELNET
+    .byt CURLPROTO_TFTP
+
+mapping_protocol_port_dest_high:
+    .byt >80
+    .byt CURLPROTO_DICT
+    .byt CURLPROTO_FILE
+    .byt CURLPROTO_FTP
+    .byt CURLPROTO_FTPS
+    .byt CURLPROTO_GOPHER
+    .byt >443
+    .byt CURLPROTO_IMAP
+    .byt CURLPROTO_IMAPS
+    .byt CURLPROTO_LDAP
+    .byt CURLPROTO_LDAPS
+    .byt CURLPROTO_POP3
+    .byt CURLPROTO_POP3S
+    .byt CURLPROTO_RTMP
+    .byt CURLPROTO_RTMPE
+    .byt CURLPROTO_RTMPS
+    .byt CURLPROTO_RTMPT
+    .byt CURLPROTO_RTMPTE
+    .byt CURLPROTO_RTMPTS
+    .byt CURLPROTO_RTSP
+    .byt CURLPROTO_SCP
+    .byt CURLPROTO_SFTP
+    .byt CURLPROTO_SMB
+    .byt CURLPROTO_SMBS
+    .byt CURLPROTO_SMTP
+    .byt CURLPROTO_SMTPS
+    .byt CURLPROTO_TELNET
+    .byt CURLPROTO_TFTP
 
 
 ;verbose_option_str:

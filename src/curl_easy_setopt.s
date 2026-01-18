@@ -9,6 +9,8 @@
 .import curl_parse_url
 .import curl_print_object
 
+.import _atoi
+
 .proc  curl_easy_setopt
     ;;@brief Set opt
     ;;@inputA Low struct curl ptr
@@ -24,19 +26,19 @@
     ;;@modifyMEM_TR7 tmp
     ;;@modifyMEM_RESB Ptr
     ;;@note send CURLE_TOO_LARGE if the url parameter is bigger than lib curl can
+    ;;@note send CURLE_TOO_LARGE if the uri parameter is bigger than lib curl can (CURL_MAX_LENGTH_URI into curl.h)
     ptr_parameter      := RES  ; ptr parameter
     curlopt            := TR0  ; option define
     curl_res           := RESB ; Curl resource
-    save_pos_parameter := TR1
     save_pos_curl_res  := TR2
     search_id_protocol := TR3
-    hostname_begin     := TR4
-    save_pos_hostname  := TR5
-    save_pos_uri       := TR6
-    uri_begin          := TR7
+    save_position_into_url := HRS1
+    save_position_into_hostname := HRS1 + 1
+    save_position_into_uri := HRS1 + 1
 
     ; RES or ptr_parameter contains parameter (3rd arg)
     ; Save
+
     sta     curl_res
     stx     curl_res + 1
     sty     curlopt ; Y contains CURLoption
@@ -115,106 +117,163 @@
 
 
 @url_option:
-    lda     #curl_struct::url ;
-    ; Recycle curlopt to save #curl_struct::url in struct
-    sta     curlopt
 
-    lda     #curl_struct::hostname
-    sta     save_pos_hostname
+    ; Set default http protocol
 
-    lda     #$01
-    sta     hostname_begin
-
-    ; Copy url into struct
-    ldy     #$00
-
-; General parsing for url parameter
-
-@parse_full_url:
-    lda     (ptr_parameter),y ; Get char from parameter
-    beq     @out_copy_url  ; End of string
-    ; Check if a port is provided
-    cmp     #':' ; Check for port or protocol
-    beq     @port_or_protocol_detected
-
-
-@return_parse:
-    ; FIXME 65C02 TYX instead
-    sty     save_pos_parameter ; Save poistion in parameter
-
-    ldy     curlopt ; curl_struct::url
-    sta     (curl_res),y ; store char into
-    inc     curlopt
-
-    ; Does we read
-    ldy     hostname_begin
-    bne     @not_hostname
-    ; Fill hostname
-    cmp     #'/'
-    bne     @fill_hostname
-
-    ; Stop hostname fill because we reached  /
-    ldy     #$01
-    sty     hostname_begin
-    bne     @not_hostname
-
-@fill_hostname:
-    ldy     save_pos_hostname
+    lda     #CURLPROTO_HTTP
+    ldy     #curl_struct::protocol
     sta     (curl_res),y
-    inc     save_pos_hostname
+    tax
+    lda     mapping_protocol_port_dest_low,x
+    ldy     #curl_struct::dest_port
+    sta     (curl_res),y
 
+    lda     mapping_protocol_port_dest_high,x
+    iny
+    sta     (curl_res),y
 
-@not_hostname:
-    ; FIXME 65C02 TXY instead
-    ldy     save_pos_parameter
+    ; Detect if a ptrocol is present (http:// ...)
+
+    ldy     #$00
+    sty     save_position_into_url  ; Store offset position of url
+@L3:
+    lda     (ptr_parameter),y
+    beq     @no_protocol ; No protocol found
+    cmp     #':'
+    beq     @validate_protocol
     iny
     cpy     #CURL_MAX_LENGTH_URL
-    bne     @parse_full_url
-    ; Error
+    bne     @L3
+
     lda     #CURLE_TOO_LARGE
     rts
 
-@out_copy_url:
-    ; Set eos
-    ldy     curlopt
-    sta     (curl_res),y
+@validate_protocol:
+    iny
+    lda     (ptr_parameter),y
+    cmp     #'/' ; Check for port or protocol
+    bne     @no_protocol ; or is a port
+    iny
+    lda     (ptr_parameter),y
+    cmp     #'/' ; Check for port or protocol
+    bne     @url_not_well_formed ; At this step we found ':/' which the third char different than '/'' but no '://'
+
+    ; A protocol is present
 
 
-; Print debug
-    ; lda     curl_res
-    ; ldy     curl_res + 1
-    ; jsr     curl_print_object
+    jsr     detect_protocol
 
+    cmp     #CURLPROTO_UNKNOWN
+    beq     @exit_with_error
+
+@no_protocol:
+    jsr     parse_hostname
+
+    cmp     #':'
+    bne     @not_a_port
+    jsr     detect_port
+
+@not_a_port:
+    ; Get Uri
+    cmp    #'/'
+    beq     @get_uri
+
+@end_parse_url:
     lda     #CURLE_OK
     rts
 
-@port_or_protocol_detected:
-   ; cpy     #CURL_MAX_LENGTH_PROTOCOL
-   ; bcc     @detect_protocol     ; Y < 6 : detect protocol
-    iny
+@get_uri:
+    jmp     @get_uri
+    ; Store position into url
+    lda     #curl_struct::uri
+    sta     save_position_into_uri
+
+    inc     save_position_into_url ; We are after '/'
+
+    ldy     save_position_into_url
+
+@L1_get_uri:
     lda     (ptr_parameter),y
-    cmp     #'/' ; Check for port or protocol
-    beq     @detect_slash_slash
-    bne     @return_parse
-@detect_slash_slash:
-    iny
-    lda     (ptr_parameter),y
-    cmp     #'/' ; Check for port or protocol
-    beq     @detect_protocol
-    bne     @return_parse
+    beq     @end_get_uri
+    ldy     save_position_into_uri
+    sta     (curl_res),y
+    inc     save_position_into_uri
+    inc     save_position_into_url
+    ldy     save_position_into_url
+    cpy     #(CURL_MAX_LENGTH_URI + curl_struct::uri)
+    bne     @L1_get_uri
+
+    lda     #CURLE_TOO_LARGE
+    rts
+
+@end_get_uri:
+    lda     #$00
+    sta     (curl_res),y
+    ; always ok
+    beq     @end_parse_url
+
+@url_not_well_formed:
+    lda     #CURLE_URL_MALFORMAT
+    rts
+
+@exit_with_error:
+    ldy     #curl_struct::protocol
+    lda     #CURLPROTO_UNKNOWN
+    sta     (curl_res),y
+    lda     #CURLE_UNSUPPORTED_PROTOCOL
+    rts
+
+read_byte_url:
+
+    rts
+
+    ; cpy     #CURL_MAX_LENGTH_URL
+    ; bne     @parse_full_url
+    ; ; Error
+    ; lda     #CURLE_TOO_LARGE
+    ; rts
+
+
+; Routine which parse hostname
+
+
+parse_hostname:
+
+    lda     #curl_struct::hostname
+    sta     save_position_into_hostname
+
+@L3:
+    ldy     save_position_into_url
+    lda     (ptr_parameter),y ; Get char from parameter
+    beq     @end_parse_hostname
+    cmp     #'/'
+    beq     @end_parse_hostname
+    cmp     #':'
+    beq     @end_parse_hostname
+    ldy     save_position_into_hostname
+    inc     save_position_into_hostname
+    sta     (curl_res),y
+    inc     save_position_into_url
+    bne     @L3
+
+@end_parse_hostname:
+    tax
+    ldy     save_position_into_hostname
+    lda     #$00
+    sta     (curl_res),y
+    txa     ; Restore A which could contains the char found '/' or ':' or 0
+
+    rts
+
+
 
 ; ##############################################################
 ; #                   url option: detect protocol (http ...)   #
 ; ##############################################################
 
-@detect_protocol:
-    dey
-    dey
-    ; Store ':' position
-    ldy     curlopt
-    sta     (curl_res),y
-    inc     curlopt
+detect_protocol:
 
+    ; Store ':' position
     ldx     #$00
     stx     search_id_protocol
 
@@ -235,7 +294,9 @@
     inx
     bne     @loop_list_protocol
     ; Protocol not found, set error
-    beq     @protocol_not_supported
+    lda     #CURLPROTO_UNKNOWN
+
+    rts
 
 
 @continue:
@@ -245,19 +306,23 @@
 
 @next_char:
     iny
+    cpy     #CURL_MAX_LENGTH_URL
+    beq     @no_slash_slash ; No protocol found
     inx
     bne     @L1_search_protocol
 
 @validate:
-    ; We are here because we reach a ':' and a token fully match (protocol)
-    iny
-    lda     (ptr_parameter),y
-    cmp     #'/'
-    bne     @protocol_not_supported
-    iny
-    lda     (ptr_parameter),y
-    cmp     #'/'
-    bne     @protocol_not_supported
+
+    iny ; Skip ':'
+    iny ; Skip '/'
+    iny ; Skip '/'
+
+
+    ; At this step protocol is recognized
+
+    ; Move pointer after //
+    sty     save_position_into_url
+
 
 
     ; Store right protocol
@@ -275,15 +340,9 @@
     iny
     sta     (curl_res),y
 
-    lda     #$00
-    sta     hostname_begin
 
 
 
-    inc     save_pos_parameter
-    inc     save_pos_parameter
-    inc     save_pos_parameter
-    inc     save_pos_parameter
 
     ; Store into url "//"
     lda     #'/'
@@ -293,137 +352,69 @@
     sta     (curl_res),y
     iny
     sty     save_pos_curl_res
-
-    ldy     save_pos_parameter
-
-    jmp     @parse_full_url
-
-
-@protocol_not_supported:
-    ldy     #curl_struct::protocol
-    lda     #CURLPROTO_UNKNOWN
-    sta     (curl_res),y
-    lda     #CURLE_UNSUPPORTED_PROTOCOL
     rts
 
+@no_slash_slash:
+    rts
+
+detect_port:
+    ldx     #$00
+    ; We de
+    inc     save_position_into_url
+    ldy     save_position_into_url
+
+@L1_detect_port:
+    lda     (ptr_parameter),y
+    beq     @convert
+    cmp     #'/'
+    beq     @convert
+
+    cmp     #$30    ; Compare avec '0' (code ASCII $30)
+    bcc     not_num ; Si A < '0', la retenue (Carry) est effacée -> Pas un chiffre
+    cmp     #$3A    ; Compare avec '9' + 1 (code ASCII $39 + 1 = $3A)
+    bcs     not_num ; Si A >= $3A, la retenue (Carry) est définie -> Pas un chiffre
+
+    inc     save_position_into_url
+    sta     port_ascii,x
+    inx
+    cpx     #$06 ; Max 5 digits for port + null terminator
+    beq     not_num ; Too long port number
+    iny
+    bne     @L1_detect_port
+
+@convert:
+    ; Skip '/'
+   ; inc     save_position_into_url
+    pha     ; push current char into url
+    lda     #$00
+    sta     port_ascii,x ; Null terminator
+
+    lda     #<port_ascii
+    ldx     #>port_ascii
+    jsr     _atoi
+
+    ; Store port
+
+    ldy     #curl_struct::dest_port
+    sta     (curl_res),y
+    txa
+    iny
+    sta     (curl_res),y
+    pla    ; restore char into url
+    rts
+
+@end_detect_port:
+    lda     #CURLE_OK
+    rts
+
+not_num:
+    lda     #CURLE_URL_MALFORMAT
+    rts
+
+
+
+port_ascii:
+    .res 5 + 1
 .endproc
 
-; protocol_str:
-;     .asciiz "http"
-;     .asciiz "dict"
-;     .asciiz "file"
-;     .asciiz "ftp"
-;     .asciiz "ftps"
-;     .asciiz "gopher"
-;     .asciiz "https"
-;     .asciiz "imap"
-;     .asciiz "imaps" ;IMAP Secure (IMAP sur SSL/TLS)
-;     .asciiz "ldap" ;Lightweight Directory Access Protocol (RFC 4511)
-;     .asciiz "ldaps" ;LDAP Secure (LDAP sur SSL/TLS)
-;     .asciiz "pop3" ;Post Office Protocol version 3 (RFC 1939)
-;     .asciiz "pop3s" ;POP3 Secure (POP3 sur SSL/TLS)
-;     .asciiz "rtmp" ;Real-Time Messaging Protocol
-;     .asciiz "RTMPS" ;RTMP Secure (RTMP sur SSL/TLS)
-;     .asciiz "RTMPE" ;RTMP Encrypted
-;     .asciiz "RTMPT" ;RTMP Tunneled in HTTP
-;     .asciiz "RTMPTE" ;RTMP Encrypted Tunneled in HTTP
-;     .asciiz "RTSP" ;Real-Time Streaming Protocol (RFC 2326)
-;     .asciiz "scp" ;Secure Copy Protocol (basé sur SSH)
-;     .asciiz "sftp" ;SSH File Transfer Protocol (basé sur SSH)
-;     .asciiz "smb" ;Server Message Block (également connu sous le nom de CIFS)
-;     .asciiz "SMBS" ;SMB Secure (SMB sur SSL/TLS)
-;     .asciiz "smtp" ;Simple Mail Transfer Protocol (RFC 5321)
-;     .asciiz "smtps" ;SMTP Secure (SMTP sur SSL/TLS)
-;     .asciiz "telnet" ;Telnet Protocol (RFC 854)
-;     .asciiz "tftp" ;Trivial File Transfer Protocol (RFC 1350)
 
-
-mapping_protocol:
-    .byt CURLPROTO_HTTP
-    .byt CURLPROTO_DICT
-    .byt CURLPROTO_FILE
-    .byt CURLPROTO_FTP
-    .byt CURLPROTO_FTPS
-    .byt CURLPROTO_GOPHER
-    .byt CURLPROTO_HTTPS
-    .byt CURLPROTO_IMAP
-    .byt CURLPROTO_IMAPS
-    .byt CURLPROTO_LDAP
-    .byt CURLPROTO_LDAPS
-    .byt CURLPROTO_POP3
-    .byt CURLPROTO_POP3S
-    .byt CURLPROTO_RTMP
-    .byt CURLPROTO_RTMPE
-    .byt CURLPROTO_RTMPS
-    .byt CURLPROTO_RTMPT
-    .byt CURLPROTO_RTMPTE
-    .byt CURLPROTO_RTMPTS
-    .byt CURLPROTO_RTSP
-    .byt CURLPROTO_SCP
-    .byt CURLPROTO_SFTP
-    .byt CURLPROTO_SMB
-    .byt CURLPROTO_SMBS
-    .byt CURLPROTO_SMTP
-    .byt CURLPROTO_SMTPS
-    .byt CURLPROTO_TELNET
-    .byt CURLPROTO_TFTP
-
-mapping_protocol_port_dest_low:
-    .byt <80
-    .byt CURLPROTO_DICT
-    .byt CURLPROTO_FILE
-    .byt CURLPROTO_FTP
-    .byt CURLPROTO_FTPS
-    .byt CURLPROTO_GOPHER
-    .byt <443
-    .byt CURLPROTO_IMAP
-    .byt CURLPROTO_IMAPS
-    .byt CURLPROTO_LDAP
-    .byt CURLPROTO_LDAPS
-    .byt CURLPROTO_POP3
-    .byt CURLPROTO_POP3S
-    .byt CURLPROTO_RTMP
-    .byt CURLPROTO_RTMPE
-    .byt CURLPROTO_RTMPS
-    .byt CURLPROTO_RTMPT
-    .byt CURLPROTO_RTMPTE
-    .byt CURLPROTO_RTMPTS
-    .byt CURLPROTO_RTSP
-    .byt CURLPROTO_SCP
-    .byt CURLPROTO_SFTP
-    .byt CURLPROTO_SMB
-    .byt CURLPROTO_SMBS
-    .byt CURLPROTO_SMTP
-    .byt CURLPROTO_SMTPS
-    .byt CURLPROTO_TELNET
-    .byt CURLPROTO_TFTP
-
-mapping_protocol_port_dest_high:
-    .byt >80
-    .byt CURLPROTO_DICT
-    .byt CURLPROTO_FILE
-    .byt CURLPROTO_FTP
-    .byt CURLPROTO_FTPS
-    .byt CURLPROTO_GOPHER
-    .byt >443
-    .byt CURLPROTO_IMAP
-    .byt CURLPROTO_IMAPS
-    .byt CURLPROTO_LDAP
-    .byt CURLPROTO_LDAPS
-    .byt CURLPROTO_POP3
-    .byt CURLPROTO_POP3S
-    .byt CURLPROTO_RTMP
-    .byt CURLPROTO_RTMPE
-    .byt CURLPROTO_RTMPS
-    .byt CURLPROTO_RTMPT
-    .byt CURLPROTO_RTMPTE
-    .byt CURLPROTO_RTMPTS
-    .byt CURLPROTO_RTSP
-    .byt CURLPROTO_SCP
-    .byt CURLPROTO_SFTP
-    .byt CURLPROTO_SMB
-    .byt CURLPROTO_SMBS
-    .byt CURLPROTO_SMTP
-    .byt CURLPROTO_SMTPS
-    .byt CURLPROTO_TELNET
-    .byt CURLPROTO_TFTP
