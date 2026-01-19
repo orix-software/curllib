@@ -148,7 +148,7 @@ jobs:
             chmod 755 ../bpm/src/bpm
             echo "/home/runner/work/file/cc65/bin" >> $GITHUB_PATH
             echo "Bpm version :"
-            bpm -V
+            #bpm -V
             ls -l
             bpm --force-update --replace-for-new-project -V
             bpm install
