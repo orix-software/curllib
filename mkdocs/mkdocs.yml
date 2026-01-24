@@ -22,13 +22,13 @@ markdown_extensions:
             format: !!python/name:pymdownx.superfences.fence_code_format
     - tables
     - pymdownx.emoji:
-        emoji_index: !!python/name:materialx.emoji.twemoji
+#        emoji_index: !!python/name:materialx.emoji.twemoji
         emoji_generator: !!python/name:materialx.emoji.to_svg
 
 plugins:
  - git-revision-date
  - search
- - markmap
+# - markmap
  - mkdocs-video
 
 #   - mkdocstrings:
@@ -41,12 +41,19 @@ dev_addr: '172.30.72.43:8002'
 #site_dir: api/
 theme:
     name: material
-    #logo: favicon.png
+    palette:
+        - scheme: default  # Thème clair par défaut
+          primary: indigo  # Couleur principale (tu peux la changer)
+          accent: indigo   # Couleur d'accentuation
+    #       toggle:
+    #           icon: material/weather-night  # Icône pour basculer vers le mode sombre
+    #           name: Basculer en mode sombre
+    # #logo: favicon.png
     #custom_dir: overrides
     highlightjs: true
-    palette:
-        primary: black
-        scheme: default
+    # palette:
+    #     primary: black
+    #     scheme: default
     features:
         - navigation.tabs
         - navigation.top
@@ -54,16 +61,31 @@ theme:
 
 nav:
     - Introduction: index.md
-    # - Versions:
-    #     - 2026.1:
-    #         - Assembly: 2026.1/assembly.md
-    #         - C: 2026.1/c.md
-    #     - 2024.1:
-    #         - Assembly: 2024.1/assembly.md
-    #         - C: 2024.1/c.md
+    - Versions:
+        - 2026.1:
+            - c:
+                - CURL *curl_easy_init();: 2026.1/_curl_easy_init.md
+                - void curl_easy_cleanup(CURL *handle);: 2026.1/_curl_easy_cleanup.md
+                - CURLcode easy_getinfo(CURL *curl, CURLINFO info, ... ): 2026.1/_curl_easy_getinfo.md
+                - CURLcode curl_easy_perform(CURL *easy_handle);:  2026.1/_curl_easy_perform.md
+                - URLcode curl_easy_setopt(CURL *handle, CURLoption option, void parameter);: 2026.1/_curl_easy_setopt.md
+                - const char *curl_easy_strerror(CURLcode errornum);: 2026.1/_curl_easy_strerror.md
+                - char *curl_version();: 2026.1/_curl_version.md
+            - assembly:
+                - curl_easy_init: 2026.1/curl_easy_init.md
+                - curl_easy_cleanup: 2026.1/curl_easy_cleanup.md
+                - curl_easy_getinfo: 2026.1/curl_easy_getinfo.md
+                - curl_easy_perform: 2026.1/curl_easy_perform.md
+                - curl_easy_setopt: 2026.1/curl_easy_setopt.md
+                - curl_easy_strerror: 2026.1/curl_easy_strerror.md
+                - curl_version: 2026.1/curl_version.md
+        #     - C: 2026.1/c
+        # - 2024.1:
+        #     - Assembly: 2024.1/assembly.md
+        #     - C: 2024.1/c.md
 
-extra_css:
-    - stylesheets/extra.css
+# extra_css:
+#     - stylesheets/extra.css
 # extra:
 #     social:
 #         - icon: fontawesome/brands/twitter

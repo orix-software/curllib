@@ -152,7 +152,7 @@ int main() {
     val = check_parsing("http://234.567.890.123/10K.htm", 80, CURLPROTO_HTTP, "http", "192.168.1.77");
     val = check_parsing("https://192.168.1.77/10K.htm", 443, CURLPROTO_HTTPS, "https", "192.168.1.77");
     val = check_parsing("gopherd://123.456.789.123/10K.htm", 80, CURLPROTO_UNKNOWN, "unknown", "192.168.1.77");
-    //val = check_parsing("gopher://192.168.1.77", 443, CURLPROTO_HTTP, "gopher");
+    val = check_parsing("gopher://192.168.1.77", 443, CURLPROTO_HTTP, "gopher", "192.168.1.77");
 
     return 0;
 }

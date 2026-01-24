@@ -1,16 +1,23 @@
 .include "telestrat.inc"
 .include "curl.inc"
 
+
 .include "../dependencies/orix-sdk/macros/SDK_memory.mac"
 
 .export curl_easy_init
+
 
 .proc curl_easy_init
     ;;@brief Create curl struct (calls XMALLOC from kernel)
     ;;@modifyMEM_RES ptr
     ;;@returnsA Low ptr curl struct
     ;;@returnsY High ptr curl struct
-
+    ;;@```asm
+    ;;@` jsr  curl_easy_init
+    ;;@` ; And X contains ptr to curl handle
+    ;;@` rts
+    ;;@```
+    ;;@note Set default protocol to HTTP and default port to 80, hostname and uri to empty string, ip to 0.0.0.0
     malloc  .sizeof(curl_struct)
     cmp     #$FF
     bne     @continue
@@ -20,7 +27,6 @@
     ; OOM FIXME
 
     rts
-
 
 @continue:
     sta     RES

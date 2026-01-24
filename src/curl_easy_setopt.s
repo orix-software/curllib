@@ -11,22 +11,36 @@
 
 .import _atoi
 
+
 .proc  curl_easy_setopt
     ;;@brief Set opt
     ;;@inputA Low struct curl ptr
     ;;@inputX High struct curl ptr
-    ;;@inputY CURLOPT_URL
-    ;;@inputMEM_RES parameter (from stack)
+    ;;@inputY CURLOPT option to set (CURLOPT_URL only handled)
+    ;;@inputMEM_RES parameter
     ;;@modifyMEM_TR0 Tmp
-    ;;@modifyMEM_TR1 Tmp
     ;;@modifyMEM_TR2 saveY tmp
     ;;@modifyMEM_TR3 tmp
-    ;;@modifyMEM_TR4 tmp
-    ;;@modifyMEM_TR6 tmp
-    ;;@modifyMEM_TR7 tmp
+    ;;@modifyMEM_HRS tmp
     ;;@modifyMEM_RESB Ptr
-    ;;@note send CURLE_TOO_LARGE if the url parameter is bigger than lib curl can
-    ;;@note send CURLE_TOO_LARGE if the uri parameter is bigger than lib curl can (CURL_MAX_LENGTH_URI into curl.h)
+    ;;@return CURLE_OK if ok, CURLE_UNKNOWN_OPTION if option unknown, CURLE_URL_MALFORMAT if url is not well formed, CURLE_TOO_LARGE if url is too long
+    ;;@```asm
+    ;;@  lda  parameter_low ; ptr to parameter
+    ;;@  sta  RES
+    ;;@  lda  parameter_high ; ptr to parameter
+    ;;@  sta  RES + 1 ; ptr to parameter
+    ;;@  lda  curl_handle_low ; ptr to curl handle
+    ;;@  ldx  curl_handle_high ; ptr to curl handle
+    ;;@  ldy  #CURLOPT_URL ; option to set
+    ;;@` jsr  curl_easy_setopt
+    ;;@` rts
+    ;;@```
+    ;;@note send CURLE_TOO_LARGE if the *url* parameter is bigger than lib curl can
+    ;;@note send CURLE_TOO_LARGE if the ** parameter is bigger than lib curl can (CURL_MAX_LENGTH_URI into curl.h)
+    ;;@note uses atoi from cc65 telestrat.lib instead of reimplementing it or calling it from orix kernel
+    ;;@note Handles only *CURLOPT_URL* option
+
+
     ptr_parameter      := RES  ; ptr parameter
     curlopt            := TR0  ; option define
     curl_res           := RESB ; Curl resource
@@ -183,7 +197,7 @@
     rts
 
 @get_uri:
-    jmp     @get_uri
+
     ; Store position into url
     lda     #curl_struct::uri
     sta     save_position_into_uri
@@ -339,10 +353,6 @@ detect_protocol:
     lda     mapping_protocol_port_dest_high,x
     iny
     sta     (curl_res),y
-
-
-
-
 
     ; Store into url "//"
     lda     #'/'

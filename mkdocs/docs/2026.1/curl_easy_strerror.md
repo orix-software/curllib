@@ -1,6 +1,3 @@
----
-
-## curl_easy_strerror
 
 ***Description***
 

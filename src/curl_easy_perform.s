@@ -18,12 +18,13 @@ curl_easy_perform_debug = 1
 .import inet_aton
 
 
+
 .import atoi32
 
 .import curlproto_http
 
 .proc curl_easy_perform
-    ;;@brief Performs request
+    ;;@brief Performs request does not work yet
     ;;@inputA Low ptr curl struct
     ;;@inputX High ptr curl struct
     ;;@modifyMEM_RES temp

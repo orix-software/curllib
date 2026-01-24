@@ -1,6 +1,3 @@
----
-
-## curl_easy_setopt
 
 ***Description***
 
@@ -10,21 +7,29 @@ Set opt
 
 * Accumulator : Low struct curl ptr
 * X Register : High struct curl ptr
-* Y Register : CURLOPT_URL 
-* RES : parameter (from stack)
+* Y Register : CURLOPT option to set (CURLOPT_URL only handled)
+* RES : parameter 
 
 ***Modify***
 
 * TR0Tmp
-* TR1Tmp
 * TR2saveY tmp
 * TR3tmp
-* TR4tmp
-* TR6tmp
-* TR7tmp
+* HRStmp
 * RESBPtr
 
-!!! note "send CURLE_TOO_LARGE if the url parameter is bigger than lib curl can"
+***Example***
 
-!!! note "send CURLE_TOO_LARGE if the uri parameter is bigger than lib curl can (CURL_MAX_LENGTH_URI into curl.h)"
+```asm
+ jsr curl_easy_setopt
+ rts
+```
+
+!!! note "send CURLE_TOO_LARGE if the *url* parameter is bigger than lib curl can"
+
+!!! note "send CURLE_TOO_LARGE if the ** parameter is bigger than lib curl can (CURL_MAX_LENGTH_URI into curl.h)"
+
+!!! note "uses atoi from cc65 telestrat.lib instead of reimplementing it or calling it from orix kernel"
+
+!!! note "Handles only *CURLOPT_URL* option"
 

@@ -3,17 +3,30 @@
 
 .export curl_easy_getinfo
 
+
 .proc curl_easy_getinfo
     ;;@brief get infos from curl ressource
     ;;@inputA Low ptr of curl ressource
     ;;@inputX High ptr of curl ressource
     ;;@inputY Curl info to get ex : CURLINFO_PROTOCOL or CURLINFO_PRIMARY_PORT etc
     ;;@modifyMEM_RES
-    ;;@modifyMEM_RESB 2 bytes
+    ;;@modifyMEM_RESB 2 bytes (for output ptr)
     ;;@modifyMEM_TR0
     ;;@modifyMEM_TR2 2 bytes
+    ;;@```asm
+    ;;@` lda ptr_parameter_low ; ptr to parameter
+    ;;@` sta RESB ; ptr to parameter
+    ;;@` lda ptr_parameter_high ; ptr to parameter
+    ;;@` sta RESB + 1 ; ptr to parameter
+    ;;@` lda curl_handle_low ; ptr to curl handle
+    ;;@` ldx curl_handle_high ; ptr to curl handle
+    ;;@` ldy CURLINFO_PROTOCOL ; info to get
+    ;;@` jsr curl_easy_cleanup
+    ;;@` rts
+    ;;@```
     ;;@note for CURLINFO_SCHEME, the parameter must be already allocated with enough space to store the string : 7 bytes
     ;;@note for CURLINFO_PRIMARY_IP, the parameter must be already allocated with enough space to store the string : eg : 16 bytes (xxx.xxx.xxx.xxx + null terminator)
+    ;;@note returns CURLE_OK if ok, CURLE_UNKNOWN_OPTION if option unknown
 
     curl_res        := RES
     curl_info       := TR0
@@ -37,6 +50,7 @@
 
     cpy     #CURLINFO_HOST
     beq     @curlinfo_hostname_extract
+
     lda     #CURLE_UNKNOWN_OPTION
 
     rts
@@ -126,9 +140,7 @@
     bne     @L2
     lda     #CURLE_OK
 
-
     rts
-
 
 init_ptr:
     ldy     #$00
@@ -139,6 +151,4 @@ init_ptr:
     sta     TR0 + 1
     rts
 
-
 .endproc
-

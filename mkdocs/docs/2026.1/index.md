@@ -4,7 +4,7 @@
 
 * [CURL *curl_easy_init();](_curl_easy_init.md)
 * [void curl_easy_cleanup(CURL *handle);](_curl_easy_cleanup.md)
-* [void curl_easy_getinfo(FIXME)](_curl_easy_getinfo.md)
+* [void curl_easy_getinfo(CURL *curl, CURLINFO info, ... )](_curl_easy_getinfo.md)
 * [CURLcode curl_easy_perform(CURL *easy_handle);](_curl_easy_perform.md)
 * [URLcode curl_easy_setopt(CURL *handle, CURLoption option, void parameter);](_curl_easy_setopt.md)
 * [const char *curl_easy_strerror(CURLcode errornum);](_curl_easy_strerror.md)

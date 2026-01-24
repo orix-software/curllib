@@ -9,6 +9,10 @@
       
       
       
+        <link rel="prev" href="../curl_easy_cleanup/">
+      
+      
+        <link rel="next" href="../curl_easy_perform/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -16,7 +20,7 @@
     
     
       
-        <title>Curl easy getinfo - CURL LIB DOCUMENTATION</title>
+        <title>curl_easy_getinfo - CURL LIB DOCUMENTATION</title>
       
     
     
@@ -42,8 +46,6 @@
       
     
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
-    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -56,21 +58,18 @@
   
     
     
+      
     
     
     
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo">
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
   
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
-      
-        
-        <a href="#curl_easy_getinfo" class="md-skip">
-          Skip to content
-        </a>
       
     </div>
     <div data-md-component="announce">
@@ -102,7 +101,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Curl easy getinfo
+              curl_easy_getinfo
             
           </span>
         </div>
@@ -110,7 +109,19 @@
     </div>
     
       
+        <form class="md-header__option" data-md-component="palette">
+  
     
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
     
     
@@ -188,6 +199,52 @@
   
 
       
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../_curl_easy_init/" class="md-tabs__link">
+          
+  
+  
+  Versions
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+    
+  
+
+      
     </ul>
   </div>
 </nav>
@@ -243,6 +300,540 @@
   
 
     
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Versions
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Versions
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    2026.1
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            2026.1
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1_1" id="__nav_2_1_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    c
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_1_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1_1">
+            <span class="md-nav__icon md-icon"></span>
+            c
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../_curl_easy_init/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CURL *curl_easy_init();
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../_curl_easy_cleanup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    void curl_easy_cleanup(CURL *handle);
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../_curl_easy_getinfo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CURLcode easy_getinfo(CURL *curl, CURLINFO info, ... )
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../_curl_easy_perform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CURLcode curl_easy_perform(CURL *easy_handle);
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../_curl_easy_setopt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    URLcode curl_easy_setopt(CURL *handle, CURLoption option, void parameter);
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../_curl_easy_strerror/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    const char *curl_easy_strerror(CURLcode errornum);
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../_curl_version/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    char *curl_version();
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_1_2" id="__nav_2_1_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    assembly
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_1_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_1_2">
+            <span class="md-nav__icon md-icon"></span>
+            assembly
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../curl_easy_init/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    curl_easy_init
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../curl_easy_cleanup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    curl_easy_cleanup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    curl_easy_getinfo
+    
+  </span>
+  
+
+      </a>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../curl_easy_perform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    curl_easy_perform
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../curl_easy_setopt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    curl_easy_setopt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../curl_easy_strerror/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    curl_easy_strerror
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../curl_version/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    curl_version
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -261,23 +852,6 @@
   
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#curl_easy_getinfo" class="md-nav__link">
-    <span class="md-ellipsis">
-      curl_easy_getinfo
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -292,11 +866,9 @@
 
 
 
-  <h1>Curl easy getinfo</h1>
+  <h1>curl_easy_getinfo</h1>
 
-<div><hr>
-<h2 id="curl_easy_getinfo">curl_easy_getinfo</h2>
-<p><strong><em>Description</em></strong></p>
+<div><p><strong><em>Description</em></strong></p>
 <p>get infos from curl ressource</p>
 <p><strong><em>Input</em></strong></p>
 <ul>
@@ -307,15 +879,29 @@
 <p><strong><em>Modify</em></strong></p>
 <ul>
 <li>RES</li>
-<li>RESB2 bytes</li>
+<li>RESB2 bytes (for output ptr)</li>
 <li>TR0</li>
 <li>TR22 bytes</li>
 </ul>
+<p><strong><em>Example</em></strong></p>
+<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nf">lda</span><span class="w"> </span><span class="no">ptr_parameter_low</span><span class="w"> </span><span class="c1">; ptr to parameter</span>
+<span class="w"> </span><span class="nf">sta</span><span class="w"> </span><span class="no">RESB</span><span class="w"> </span><span class="c1">; ptr to parameter</span>
+<span class="w"> </span><span class="nf">lda</span><span class="w"> </span><span class="no">ptr_parameter_high</span><span class="w"> </span><span class="c1">; ptr to parameter</span>
+<span class="w"> </span><span class="nf">sta</span><span class="w"> </span><span class="no">RESB</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="c1">; ptr to parameter</span>
+<span class="w"> </span><span class="nf">lda</span><span class="w"> </span><span class="no">curl_handle_low</span><span class="w"> </span><span class="c1">; ptr to curl handle</span>
+<span class="w"> </span><span class="nf">ldx</span><span class="w"> </span><span class="no">curl_handle_high</span><span class="w"> </span><span class="c1">; ptr to curl handle</span>
+<span class="w"> </span><span class="nf">ldy</span><span class="w"> </span><span class="no">CURLINFO_PROTOCOL</span><span class="w"> </span><span class="c1">; info to get</span>
+<span class="w"> </span><span class="nf">jsr</span><span class="w"> </span><span class="no">curl_easy_cleanup</span>
+<span class="w"> </span><span class="nf">rts</span>
+</code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">for CURLINFO_SCHEME, the parameter must be already allocated with enough space to store the string : 7 bytes</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">for CURLINFO_PRIMARY_IP, the parameter must be already allocated with enough space to store the string : eg : 16 bytes (xxx.xxx.xxx.xxx + null terminator)</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">returns CURLE_OK if ok, CURLE_UNKNOWN_OPTION if option unknown</p>
 </div></div>
 
 
@@ -337,7 +923,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    2026-01-09
+    2026-01-19
   </span>
 
     
